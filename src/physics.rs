@@ -104,30 +104,29 @@ fn rect_rect_collision(
     rect: &Rectangle,
     rect_transform: &Transform,
 ) -> Option<Vec2> {
-    let dx = dyn_transform.translation.x - rect_transform.translation.x;
-    let px = (dyn_rect.width + rect.width) / 2.0 - dx.abs();
-    if px <= 0.0 {
-        return None;
-    }
+    let collision_x = dyn_transform.translation.x + dyn_rect.width / 2.0
+        >= rect_transform.translation.x - rect.width / 2.0
+        && rect_transform.translation.x + rect.width / 2.0
+            >= dyn_transform.translation.x - dyn_rect.width / 2.0;
 
-    let dy = dyn_transform.translation.y - rect_transform.translation.y;
-    let py = (dyn_rect.height + rect.height) / 2.0 - dy.abs();
-    if py <= 0.0 {
-        return None;
-    }
+    let collision_y = dyn_transform.translation.y + dyn_rect.height / 2.0
+        >= rect_transform.translation.y - rect.height / 2.0
+        && rect_transform.translation.y + rect.height / 2.0
+            >= dyn_transform.translation.y - dyn_rect.height / 2.0;
 
-    if px < py {
-        let sign = dx.signum();
-        Some(Vec2::new(
-            dyn_transform.translation.x + dyn_rect.width / 2.0 * sign,
-            rect_transform.translation.y,
-        ))
+    if collision_x && collision_y {
+        let top = (dyn_transform.translation.y + dyn_rect.height / 2.0)
+            .min(rect_transform.translation.y + rect.height / 2.0);
+        let bot = (dyn_transform.translation.y - dyn_rect.height / 2.0)
+            .max(rect_transform.translation.y - rect.height / 2.0);
+        let right = (dyn_transform.translation.x + dyn_rect.width / 2.0)
+            .min(rect_transform.translation.x + rect.width / 2.0);
+        let left = (dyn_transform.translation.x - dyn_rect.width / 2.0)
+            .max(rect_transform.translation.x - rect.width / 2.0);
+
+        Some(Vec2::new((left + right) / 2.0, (top + bot) / 2.0))
     } else {
-        let sign = dy.signum();
-        Some(Vec2::new(
-            rect_transform.translation.x,
-            dyn_transform.translation.y + dyn_rect.height / 2.0 * sign,
-        ))
+        None
     }
 }
 
