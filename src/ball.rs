@@ -1,4 +1,4 @@
-use crate::physics::{Ball, CollisionEvent, Dynamic};
+use crate::physics::{Ball, PhysicsStage, CollisionEvent, Dynamic};
 use bevy::prelude::*;
 
 // TODO move to config file
@@ -11,8 +11,8 @@ pub struct BallPlugin;
 impl Plugin for BallPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(ball_spawn);
-        app.add_system(ball_movement);
-        app.add_system(ball_collision);
+        app.add_system_to_stage(PhysicsStage::Movement, ball_movement);
+        app.add_system_to_stage(PhysicsStage::CollisionResolution, ball_collision);
     }
 }
 

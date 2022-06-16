@@ -21,10 +21,10 @@ fn main() {
     app.insert_resource(ClearColor(Color::BLACK));
 
     app.add_plugins(DefaultPlugins);
+    app.add_plugin(PhysicsPlugin { debug: true });
     app.add_plugin(ScenePlugin);
     app.add_plugin(PlatformPlugin);
     app.add_plugin(BallPlugin);
-    app.add_plugin(PhysicsPlugin { debug: true });
     app.add_startup_system(setup);
     app.run();
 }

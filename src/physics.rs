@@ -1,5 +1,12 @@
 use bevy::prelude::*;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, StageLabel)]
+pub enum PhysicsStage {
+    Movement,
+    CollisionDetection,
+    CollisionResolution,
+}
+
 pub struct PhysicsPlugin {
     pub debug: bool,
 }
@@ -7,10 +14,17 @@ pub struct PhysicsPlugin {
 impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>();
-        app.add_system(ball_rect_collision_system);
-        app.add_system(rect_rect_collision_system);
+        app.add_stage(PhysicsStage::Movement, SystemStage::parallel());
+        app.add_stage_after(PhysicsStage::Movement, PhysicsStage::CollisionDetection, SystemStage::parallel());
+        app.add_stage_after(PhysicsStage::CollisionDetection, PhysicsStage::CollisionResolution, SystemStage::parallel());
+        app.add_system_set_to_stage(
+            PhysicsStage::CollisionDetection,
+            SystemSet::new()
+                .with_system(ball_rect_collision_system)
+                .with_system(rect_rect_collision_system),
+        );
         if self.debug {
-            app.add_system(debug_physics_event);
+            app.add_system_to_stage(PhysicsStage::CollisionResolution, debug_physics_event);
         }
     }
 }
