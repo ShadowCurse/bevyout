@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::physics::{CollisionEvent, PhysicsStage, Dynamic, Rectangle};
+use crate::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
 use crate::scene::SceneSize;
 
 // TODO move to config file
@@ -74,8 +74,8 @@ fn platform_collision(
     for event in collision_events.iter() {
         if event.entity1 == platform_entity {
             if event.collision_point.x < platform_transform.translation.x {
-                let diff = event.collision_point.x - (platform_transform.translation.x
-                    - platform_rect.width / 2.0);
+                let diff = event.collision_point.x
+                    - (platform_transform.translation.x - platform_rect.width / 2.0);
                 platform_transform.translation.x =
                     event.collision_point.x + diff + platform_rect.width / 2.0;
             } else {

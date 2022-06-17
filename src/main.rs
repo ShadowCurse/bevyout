@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 
 mod ball;
+mod bricks;
 mod physics;
 mod platform;
 mod scene;
 
 use ball::BallPlugin;
+use bricks::BricksPlugin;
 use physics::PhysicsPlugin;
 use platform::PlatformPlugin;
 use scene::{ScenePlugin, SceneSize};
@@ -25,6 +27,7 @@ fn main() {
     app.add_plugin(ScenePlugin);
     app.add_plugin(PlatformPlugin);
     app.add_plugin(BallPlugin);
+    app.add_plugin(BricksPlugin);
     app.add_startup_system(setup);
     app.run();
 }
