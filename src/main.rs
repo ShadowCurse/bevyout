@@ -5,12 +5,14 @@ mod bricks;
 mod physics;
 mod platform;
 mod scene;
+mod ui;
 
 use ball::BallPlugin;
 use bricks::BricksPlugin;
 use physics::PhysicsPlugin;
 use platform::PlatformPlugin;
 use scene::{ScenePlugin, SceneSize};
+use ui::UiPlugin;
 
 fn main() {
     let mut app = App::new();
@@ -28,6 +30,7 @@ fn main() {
     app.add_plugin(PlatformPlugin);
     app.add_plugin(BallPlugin);
     app.add_plugin(BricksPlugin);
+    app.add_plugin(UiPlugin);
     app.add_startup_system(setup);
     app.run();
 }
