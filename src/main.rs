@@ -14,6 +14,15 @@ use platform::PlatformPlugin;
 use scene::{ScenePlugin, SceneSize};
 use ui::UiPlugin;
 
+/// Application states
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum AppState {
+    MainMenu,
+    Settings,
+    InGame,
+    GameOver,
+}
+
 fn main() {
     let mut app = App::new();
 
@@ -25,12 +34,14 @@ fn main() {
     app.insert_resource(ClearColor(Color::BLACK));
 
     app.add_plugins(DefaultPlugins);
+
+    app.add_plugin(UiPlugin);
+
     app.add_plugin(PhysicsPlugin { debug: true });
     app.add_plugin(ScenePlugin);
     app.add_plugin(PlatformPlugin);
     app.add_plugin(BallPlugin);
     app.add_plugin(BricksPlugin);
-    app.add_plugin(UiPlugin);
     app.add_startup_system(setup);
     app.run();
 }
