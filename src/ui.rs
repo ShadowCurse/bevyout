@@ -16,10 +16,11 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
+        app.add_startup_system(ui_style_setup);
         app.add_state(AppState::MainMenu);
-        app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(ui_setup));
+        app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(main_menu_setup));
+        app.add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(button_system));
         app.add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(ui_remove));
-        app.add_system(button_system);
     }
 }
 
@@ -33,49 +34,62 @@ enum UiButtons {
     Exit,
 }
 
-fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    // Ui
+#[derive(Component, Debug, Clone)]
+pub struct UiStyle {
+    btn_style: Style,
+    btn_style_text: TextStyle,
+    menu_style: Style,
+}
+
+fn ui_style_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+    commands.insert_resource(UiStyle {
+        btn_style: Style {
+            size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
+            // center button
+            margin: UiRect::all(Val::Auto),
+            // horizontally center child text
+            justify_content: JustifyContent::Center,
+            // vertically center child text
+            align_items: AlignItems::Center,
+            ..default()
+        },
+        btn_style_text: TextStyle {
+            font: asset_server.load("fonts/monaco.ttf"),
+            font_size: 20.0,
+            color: UI_FOREGROUND,
+        },
+        menu_style: Style {
+            size: Size::new(Val::Px(UI_WIDTH), Val::Px(UI_HEIGHT)),
+            // center button
+            margin: UiRect::all(Val::Auto),
+            // horizontally center child text
+            justify_content: JustifyContent::Center,
+            // vertically center child text
+            align_items: AlignItems::Stretch,
+            ..default()
+        },
+    });
+}
+
+fn main_menu_setup(mut commands: Commands, style: Res<UiStyle>) {
     let ui = commands
         .spawn_bundle(NodeBundle {
-            style: Style {
-                size: Size::new(Val::Px(UI_WIDTH), Val::Px(UI_HEIGHT)),
-                // center button
-                margin: UiRect::all(Val::Auto),
-                // horizontally center child text
-                justify_content: JustifyContent::Center,
-                // vertically center child text
-                align_items: AlignItems::Stretch,
-                ..default()
-            },
+            style: style.menu_style.clone(),
             color: UI_BACKGROUND.into(),
             ..default()
         })
         .insert(UiElement)
         .id();
 
-    spawn_button(&mut commands, ui, &asset_server, UiButtons::Start);
-    spawn_button(&mut commands, ui, &asset_server, UiButtons::Settings);
-    spawn_button(&mut commands, ui, &asset_server, UiButtons::Exit);
+    spawn_button(&mut commands, ui, &style, UiButtons::Start);
+    spawn_button(&mut commands, ui, &style, UiButtons::Settings);
+    spawn_button(&mut commands, ui, &style, UiButtons::Exit);
 }
 
-fn spawn_button(
-    commands: &mut Commands,
-    parent: Entity,
-    asset_server: &Res<AssetServer>,
-    button: UiButtons,
-) {
+fn spawn_button(commands: &mut Commands, parent: Entity, style: &UiStyle, button: UiButtons) {
     let child = commands
         .spawn_bundle(ButtonBundle {
-            style: Style {
-                size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
-                // center button
-                margin: UiRect::all(Val::Auto),
-                // horizontally center child text
-                justify_content: JustifyContent::Center,
-                // vertically center child text
-                align_items: AlignItems::Center,
-                ..default()
-            },
+            style: style.btn_style.clone(),
             color: NORMAL_BUTTON.into(),
             ..default()
         })
@@ -84,11 +98,7 @@ fn spawn_button(
                 .spawn_bundle(TextBundle {
                     text: Text::with_section(
                         format!("{:?}", button),
-                        TextStyle {
-                            font: asset_server.load("fonts/monaco.ttf"),
-                            font_size: 20.0,
-                            color: UI_FOREGROUND,
-                        },
+                        style.btn_style_text.clone(),
                         Default::default(),
                     ),
                     ..default()
