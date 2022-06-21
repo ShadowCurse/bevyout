@@ -1,17 +1,9 @@
 use bevy::prelude::*;
 
-mod ball;
-mod bricks;
-mod physics;
-mod platform;
-mod scene;
+mod game;
 mod ui;
 
-use ball::BallPlugin;
-use bricks::BricksPlugin;
-use physics::PhysicsPlugin;
-use platform::PlatformPlugin;
-use scene::{ScenePlugin, SceneSize};
+use game::{scene::SceneSize, GamePlugin};
 use ui::UiPlugin;
 
 /// Application states
@@ -36,12 +28,8 @@ fn main() {
     app.add_plugins(DefaultPlugins);
 
     app.add_plugin(UiPlugin);
+    app.add_plugin(GamePlugin);
 
-    app.add_plugin(PhysicsPlugin { debug: true });
-    app.add_plugin(ScenePlugin);
-    app.add_plugin(PlatformPlugin);
-    app.add_plugin(BallPlugin);
-    app.add_plugin(BricksPlugin);
     app.add_startup_system(setup);
     app.run();
 }

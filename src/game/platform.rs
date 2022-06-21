@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
-use crate::scene::SceneSize;
+use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
+use crate::game::scene::SceneSize;
 
 // TODO move to config file
 const PLATFORM_WIDTH: f32 = 50.0;

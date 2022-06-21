@@ -1,4 +1,4 @@
-use crate::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
+use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
 use bevy::prelude::*;
 
 // TODO move to config file

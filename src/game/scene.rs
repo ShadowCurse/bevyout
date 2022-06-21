@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::physics::Rectangle;
+use crate::game::physics::Rectangle;
 
 // TODO move to config file
 const WIDTH: u32 = 200;

@@ -1,4 +1,4 @@
-use crate::physics::{CollisionEvent, PhysicsStage, Rectangle};
+use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
 use bevy::prelude::*;
 
 // TODO move to config file
