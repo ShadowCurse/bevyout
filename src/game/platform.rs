@@ -1,7 +1,8 @@
 use bevy::prelude::*;
 
-use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
+use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, PhysicsState, Rectangle};
 use crate::game::scene::SceneSize;
+use crate::AppState;
 
 // TODO move to config file
 const PLATFORM_WIDTH: f32 = 50.0;
@@ -12,9 +13,15 @@ pub struct PlatformPlugin;
 
 impl Plugin for PlatformPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(platform_spawn);
-        app.add_system_to_stage(PhysicsStage::Movement, platform_movement);
-        app.add_system_to_stage(PhysicsStage::CollisionResolution, platform_collision);
+        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(platform_spawn));
+        app.add_system_set_to_stage(
+            PhysicsStage::Movement,
+            SystemSet::on_update(PhysicsState::Running).with_system(platform_movement),
+        );
+        app.add_system_set_to_stage(
+            PhysicsStage::CollisionResolution,
+            SystemSet::on_update(PhysicsState::Running).with_system(platform_collision),
+        );
     }
 }
 

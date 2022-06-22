@@ -1,5 +1,7 @@
-use crate::AppState;
 use bevy::prelude::*;
+
+use crate::game::physics::PhysicsState;
+use crate::AppState;
 
 // TODO move to config file
 const UI_WIDTH: f32 = 500.0;
@@ -17,7 +19,6 @@ pub struct UiPlugin;
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
         app.add_startup_system(ui_style_setup);
-        app.add_state(AppState::MainMenu);
         app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(main_menu_setup));
         app.add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(button_system));
         app.add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(ui_remove));
@@ -119,7 +120,8 @@ fn ui_remove(mut commands: Commands, ui: Query<Entity, With<UiElement>>) {
 }
 
 fn button_system(
-    mut state: ResMut<State<AppState>>,
+    mut game_state: ResMut<State<AppState>>,
+    mut physics_state: ResMut<State<PhysicsState>>,
     mut interaction_query: Query<
         (&UiButtons, &Interaction, &mut UiColor),
         (Changed<Interaction>, With<Button>),
@@ -130,8 +132,11 @@ fn button_system(
             Interaction::Clicked => {
                 *color = PRESSED_BUTTON.into();
                 match button {
-                    UiButtons::Start => state.set(AppState::InGame).unwrap(),
-                    UiButtons::Settings => state.set(AppState::Settings).unwrap(),
+                    UiButtons::Start => {
+                        game_state.set(AppState::InGame).unwrap();
+                        physics_state.set(PhysicsState::Running).unwrap();
+                    }
+                    UiButtons::Settings => game_state.set(AppState::Settings).unwrap(),
                     UiButtons::Exit => {}
                 }
             }

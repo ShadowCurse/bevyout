@@ -1,10 +1,17 @@
-use bevy::prelude::*;
+use crate::AppState;
+use bevy::{ecs::schedule::ShouldRun, prelude::*};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, StageLabel)]
+#[derive(StageLabel, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PhysicsStage {
     Movement,
     CollisionDetection,
     CollisionResolution,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum PhysicsState {
+    Running,
+    NotRunning,
 }
 
 pub struct PhysicsPlugin {
@@ -25,9 +32,13 @@ impl Plugin for PhysicsPlugin {
             PhysicsStage::CollisionResolution,
             SystemStage::parallel(),
         );
+        app.add_state_to_stage(PhysicsStage::Movement, PhysicsState::NotRunning);
+        app.add_state_to_stage(PhysicsStage::CollisionDetection, PhysicsState::NotRunning);
+        app.add_state_to_stage(PhysicsStage::CollisionResolution, PhysicsState::NotRunning);
         app.add_system_set_to_stage(
             PhysicsStage::CollisionDetection,
-            SystemSet::new()
+            SystemSet::on_update(PhysicsState::Running)
+                // SystemSet::new()
                 .with_system(ball_rect_collision_system)
                 .with_system(rect_rect_collision_system),
         );

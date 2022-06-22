@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::physics::Rectangle;
+use crate::AppState;
 
 // TODO move to config file
 const WIDTH: u32 = 200;
@@ -19,7 +20,7 @@ impl Plugin for ScenePlugin {
             width: WIDTH,
             height: HEIGHT,
         });
-        app.add_startup_system(scene_spawn);
+        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(scene_spawn));
     }
 }
 

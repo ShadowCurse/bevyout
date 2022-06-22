@@ -10,9 +10,10 @@ use ui::UiPlugin;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum AppState {
     MainMenu,
-    Settings,
     InGame,
-    GameOver,
+    Paused,
+    Settings,
+    Exit,
 }
 
 fn main() {
@@ -22,11 +23,10 @@ fn main() {
         level: bevy::log::Level::DEBUG,
         ..Default::default()
     });
-
     app.insert_resource(ClearColor(Color::BLACK));
+    app.add_state(AppState::MainMenu);
 
     app.add_plugins(DefaultPlugins);
-
     app.add_plugin(UiPlugin);
     app.add_plugin(GamePlugin);
 

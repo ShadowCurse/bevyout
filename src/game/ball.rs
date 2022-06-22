@@ -1,5 +1,7 @@
-use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
 use bevy::prelude::*;
+
+use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage, PhysicsState};
+use crate::AppState;
 
 // TODO move to config file
 const BALL_RADIUS: f32 = 5.0;
@@ -10,9 +12,15 @@ pub struct BallPlugin;
 
 impl Plugin for BallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(ball_spawn);
-        app.add_system_to_stage(PhysicsStage::Movement, ball_movement);
-        app.add_system_to_stage(PhysicsStage::CollisionResolution, ball_collision);
+        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(ball_spawn));
+        app.add_system_set_to_stage(
+            PhysicsStage::Movement,
+            SystemSet::on_update(PhysicsState::Running).with_system(ball_movement),
+        );
+        app.add_system_set_to_stage(
+            PhysicsStage::CollisionResolution,
+            SystemSet::on_update(PhysicsState::Running).with_system(ball_collision),
+        );
     }
 }
 
