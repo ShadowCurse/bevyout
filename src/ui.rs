@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, app::AppExit};
 
 use crate::game::physics::PhysicsState;
 use crate::AppState;
@@ -126,6 +126,7 @@ fn button_system(
         (&UiButtons, &Interaction, &mut UiColor),
         (Changed<Interaction>, With<Button>),
     >,
+    mut exit: EventWriter<AppExit>,
 ) {
     for (button, interaction, mut color) in interaction_query.iter_mut() {
         match *interaction {
@@ -137,7 +138,7 @@ fn button_system(
                         physics_state.set(PhysicsState::Running).unwrap();
                     }
                     UiButtons::Settings => game_state.set(AppState::Settings).unwrap(),
-                    UiButtons::Exit => {}
+                    UiButtons::Exit => exit.send(AppExit)
                 }
             }
             Interaction::Hovered => {
