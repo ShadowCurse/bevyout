@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 mod game;
 mod ui;
+mod utils;
 
 use game::{scene::SceneSize, GamePlugin};
 use ui::UiPlugin;

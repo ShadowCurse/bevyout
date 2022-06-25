@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage, PhysicsState};
+use crate::game::GameElement;
 use crate::AppState;
 
 // TODO move to config file
@@ -45,6 +46,7 @@ fn ball_spawn(
             transform: Transform::from_xyz(100.0, 50.0, 0.0),
             ..default()
         })
+        .insert(GameElement)
         .insert(Ball {
             radius: BALL_RADIUS,
         })

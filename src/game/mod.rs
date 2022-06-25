@@ -6,12 +6,12 @@ pub mod physics;
 pub mod platform;
 pub mod scene;
 
+use crate::{utils::remove_all_with, AppState};
 use ball::BallPlugin;
 use bricks::BricksPlugin;
-use physics::PhysicsPlugin;
+use physics::{PhysicsPlugin, PhysicsState};
 use platform::PlatformPlugin;
 use scene::ScenePlugin;
-use crate::AppState;
 
 pub struct GamePlugin;
 
@@ -24,11 +24,22 @@ impl Plugin for GamePlugin {
         app.add_plugin(BricksPlugin);
 
         app.add_system_set(SystemSet::on_update(AppState::InGame).with_system(game_exit));
+        app.add_system_set(
+            SystemSet::on_exit(AppState::InGame).with_system(remove_all_with::<GameElement>),
+        );
     }
 }
 
-fn game_exit(keys: Res<Input<KeyCode>>, mut game_state: ResMut<State<AppState>>) {
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct GameElement;
+
+fn game_exit(
+    mut game_state: ResMut<State<AppState>>,
+    mut physics_state: ResMut<State<PhysicsState>>,
+    keys: Res<Input<KeyCode>>,
+) {
     if keys.pressed(KeyCode::Escape) {
-        game_state.set(AppState::MainMenu).unwrap()
+        game_state.set(AppState::MainMenu).unwrap();
+        physics_state.set(PhysicsState::NotRunning).unwrap();
     }
 }

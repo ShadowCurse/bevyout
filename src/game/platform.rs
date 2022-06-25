@@ -2,6 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, PhysicsState, Rectangle};
 use crate::game::scene::SceneSize;
+use crate::game::GameElement;
 use crate::AppState;
 
 // TODO move to config file
@@ -47,6 +48,7 @@ fn platform_spawn(
             transform: Transform::from_xyz(scene_size.width as f32 / 2.0, 10.0, 0.0),
             ..default()
         })
+        .insert(GameElement)
         .insert(Rectangle {
             width: PLATFORM_WIDTH,
             height: PLATFORM_HEIGHT,

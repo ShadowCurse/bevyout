@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::physics::{CollisionEvent, PhysicsStage, PhysicsState, Rectangle};
+use crate::game::GameElement;
 use crate::AppState;
 
 // TODO move to config file
@@ -60,6 +61,7 @@ fn bricks_spawn(
                 transform: Transform::from_translation(pos),
                 ..default()
             })
+            .insert(GameElement)
             .insert(Rectangle {
                 width: BRICKS_WIDTH,
                 height: BRICKS_HEIGHT,

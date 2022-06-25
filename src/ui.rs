@@ -1,6 +1,7 @@
-use bevy::{prelude::*, app::AppExit};
+use bevy::{app::AppExit, prelude::*};
 
 use crate::game::physics::PhysicsState;
+use crate::utils::remove_all_with;
 use crate::AppState;
 
 // TODO move to config file
@@ -21,7 +22,9 @@ impl Plugin for UiPlugin {
         app.add_startup_system(ui_style_setup);
         app.add_system_set(SystemSet::on_enter(AppState::MainMenu).with_system(main_menu_setup));
         app.add_system_set(SystemSet::on_update(AppState::MainMenu).with_system(button_system));
-        app.add_system_set(SystemSet::on_exit(AppState::MainMenu).with_system(ui_remove));
+        app.add_system_set(
+            SystemSet::on_exit(AppState::MainMenu).with_system(remove_all_with::<UiElement>),
+        );
     }
 }
 
@@ -113,12 +116,6 @@ fn spawn_button(commands: &mut Commands, parent: Entity, style: &UiStyle, button
     commands.entity(parent).push_children(&[child]);
 }
 
-fn ui_remove(mut commands: Commands, ui: Query<Entity, With<UiElement>>) {
-    for ui in ui.iter() {
-        commands.entity(ui).despawn();
-    }
-}
-
 fn button_system(
     mut game_state: ResMut<State<AppState>>,
     mut physics_state: ResMut<State<PhysicsState>>,
@@ -138,7 +135,7 @@ fn button_system(
                         physics_state.set(PhysicsState::Running).unwrap();
                     }
                     UiButtons::Settings => game_state.set(AppState::Settings).unwrap(),
-                    UiButtons::Exit => exit.send(AppExit)
+                    UiButtons::Exit => exit.send(AppExit),
                 }
             }
             Interaction::Hovered => {

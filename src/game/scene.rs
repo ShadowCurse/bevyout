@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::physics::Rectangle;
+use crate::game::GameElement;
 use crate::AppState;
 
 // TODO move to config file
@@ -42,6 +43,7 @@ fn scene_spawn(
             transform: Transform::from_xyz(WIDTH as f32 / 2.0, HEIGHT as f32, 0.0),
             ..default()
         })
+        .insert(GameElement)
         .insert(Rectangle {
             width: WIDTH as f32,
             height: 1.0,
@@ -54,6 +56,7 @@ fn scene_spawn(
             transform: Transform::from_xyz(WIDTH as f32 / 2.0, 0.0, 0.0),
             ..default()
         })
+        .insert(GameElement)
         .insert(Rectangle {
             width: WIDTH as f32,
             height: 1.0,
@@ -66,6 +69,7 @@ fn scene_spawn(
             transform: Transform::from_xyz(0.0, HEIGHT as f32 / 2.0, 0.0),
             ..default()
         })
+        .insert(GameElement)
         .insert(Rectangle {
             width: 1.0,
             height: HEIGHT as f32,
@@ -78,6 +82,7 @@ fn scene_spawn(
             transform: Transform::from_xyz(WIDTH as f32, HEIGHT as f32 / 2.0, 0.0),
             ..default()
         })
+        .insert(GameElement)
         .insert(Rectangle {
             width: 1.0,
             height: HEIGHT as f32,
