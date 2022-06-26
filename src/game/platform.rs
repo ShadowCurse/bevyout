@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, PhysicsState, Rectangle};
-use crate::game::scene::SceneSize;
+use crate::game::scene::SceneParams;
 use crate::game::GameElement;
 use crate::AppState;
 
@@ -33,7 +33,7 @@ pub struct GamePlatform {
 
 fn platform_spawn(
     mut commands: Commands,
-    scene_size: Res<SceneSize>,
+    scene_size: Res<SceneParams>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {

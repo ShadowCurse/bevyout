@@ -4,7 +4,7 @@ mod game;
 mod ui;
 mod utils;
 
-use game::{scene::SceneSize, GamePlugin};
+use game::{scene::SceneParams, GamePlugin};
 use ui::UiPlugin;
 
 /// Application states
@@ -35,7 +35,7 @@ fn main() {
     app.run();
 }
 
-fn setup(mut commands: Commands, scene_size: Res<SceneSize>) {
+fn setup(mut commands: Commands, scene_size: Res<SceneParams>) {
     // camera
     let cam_pos = Vec3::new(
         scene_size.width as f32 / 2.0,
