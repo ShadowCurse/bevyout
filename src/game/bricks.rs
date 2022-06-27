@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::game::physics::{CollisionEvent, PhysicsStage, PhysicsState, Rectangle};
+use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
 use crate::game::GameElement;
-use crate::AppState;
+use crate::game::GameState;
 
 // TODO move to config file
 const BRICKS_POS_X: f32 = 100.0;
@@ -19,10 +19,10 @@ pub struct BricksPlugin;
 
 impl Plugin for BricksPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(bricks_spawn));
+        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(bricks_spawn));
         app.add_system_set_to_stage(
             PhysicsStage::CollisionResolution,
-            SystemSet::on_update(PhysicsState::Running).with_system(bricks_collision),
+            SystemSet::on_update(GameState::InGame).with_system(bricks_collision),
         );
     }
 }

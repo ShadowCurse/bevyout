@@ -1,17 +1,11 @@
-use crate::AppState;
-use bevy::{ecs::schedule::ShouldRun, prelude::*};
+use crate::game::GameState;
+use bevy::prelude::*;
 
 #[derive(StageLabel, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PhysicsStage {
     Movement,
     CollisionDetection,
     CollisionResolution,
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum PhysicsState {
-    Running,
-    NotRunning,
 }
 
 pub struct PhysicsPlugin {
@@ -21,6 +15,7 @@ pub struct PhysicsPlugin {
 impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>();
+
         app.add_stage(PhysicsStage::Movement, SystemStage::parallel());
         app.add_stage_after(
             PhysicsStage::Movement,
@@ -32,13 +27,13 @@ impl Plugin for PhysicsPlugin {
             PhysicsStage::CollisionResolution,
             SystemStage::parallel(),
         );
-        app.add_state_to_stage(PhysicsStage::Movement, PhysicsState::NotRunning);
-        app.add_state_to_stage(PhysicsStage::CollisionDetection, PhysicsState::NotRunning);
-        app.add_state_to_stage(PhysicsStage::CollisionResolution, PhysicsState::NotRunning);
+
+        app.add_state_to_stage(PhysicsStage::Movement, GameState::NotInGame);
+        app.add_state_to_stage(PhysicsStage::CollisionDetection, GameState::NotInGame);
+        app.add_state_to_stage(PhysicsStage::CollisionResolution, GameState::NotInGame);
         app.add_system_set_to_stage(
             PhysicsStage::CollisionDetection,
-            SystemSet::on_update(PhysicsState::Running)
-                // SystemSet::new()
+            SystemSet::on_update(GameState::InGame)
                 .with_system(ball_rect_collision_system)
                 .with_system(rect_rect_collision_system),
         );

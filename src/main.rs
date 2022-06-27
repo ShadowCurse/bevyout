@@ -7,16 +7,6 @@ mod utils;
 use game::{scene::SceneParams, GamePlugin};
 use ui::UiPlugin;
 
-/// Application states
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum AppState {
-    MainMenu,
-    InGame,
-    Paused,
-    Settings,
-    Exit,
-}
-
 fn main() {
     let mut app = App::new();
 
@@ -25,7 +15,6 @@ fn main() {
         ..Default::default()
     });
     app.insert_resource(ClearColor(Color::BLACK));
-    app.add_state(AppState::MainMenu);
 
     app.add_plugins(DefaultPlugins);
     app.add_plugin(UiPlugin);

@@ -1,9 +1,9 @@
 use bevy::prelude::*;
 
-use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, PhysicsState, Rectangle};
+use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
 use crate::game::scene::SceneParams;
 use crate::game::GameElement;
-use crate::AppState;
+use crate::game::GameState;
 
 // TODO move to config file
 const PLATFORM_WIDTH: f32 = 50.0;
@@ -14,14 +14,14 @@ pub struct PlatformPlugin;
 
 impl Plugin for PlatformPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(platform_spawn));
+        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(platform_spawn));
         app.add_system_set_to_stage(
             PhysicsStage::Movement,
-            SystemSet::on_update(PhysicsState::Running).with_system(platform_movement),
+            SystemSet::on_update(GameState::InGame).with_system(platform_movement),
         );
         app.add_system_set_to_stage(
             PhysicsStage::CollisionResolution,
-            SystemSet::on_update(PhysicsState::Running).with_system(platform_collision),
+            SystemSet::on_update(GameState::InGame).with_system(platform_collision),
         );
     }
 }
@@ -64,13 +64,14 @@ fn platform_movement(
     time: Res<Time>,
     mut platform: Query<(&GamePlatform, &mut Transform)>,
 ) {
-    let (platform, mut transform) = platform.single_mut();
-    if keys.pressed(KeyCode::A) {
-        transform.translation.x -= platform.speed * time.delta_seconds();
-    }
+    if let Ok((platform, mut transform)) = platform.get_single_mut() {
+        if keys.pressed(KeyCode::A) {
+            transform.translation.x -= platform.speed * time.delta_seconds();
+        }
 
-    if keys.pressed(KeyCode::D) {
-        transform.translation.x += platform.speed * time.delta_seconds();
+        if keys.pressed(KeyCode::D) {
+            transform.translation.x += platform.speed * time.delta_seconds();
+        }
     }
 }
 
@@ -78,20 +79,21 @@ fn platform_collision(
     mut collision_events: EventReader<CollisionEvent>,
     mut platform: Query<(Entity, &Rectangle, &mut Transform), With<GamePlatform>>,
 ) {
-    let (platform_entity, platform_rect, mut platform_transform) =
-        platform.get_single_mut().unwrap();
-    for event in collision_events.iter() {
-        if event.entity1 == platform_entity {
-            if event.collision_point.x < platform_transform.translation.x {
-                let diff = event.collision_point.x
-                    - (platform_transform.translation.x - platform_rect.width / 2.0);
-                platform_transform.translation.x =
-                    event.collision_point.x + diff + platform_rect.width / 2.0;
-            } else {
-                let diff = (platform_transform.translation.x + platform_rect.width / 2.0)
-                    - event.collision_point.x;
-                platform_transform.translation.x =
-                    event.collision_point.x - diff - platform_rect.width / 2.0;
+    if let Ok((platform_entity, platform_rect, mut platform_transform)) = platform.get_single_mut()
+    {
+        for event in collision_events.iter() {
+            if event.entity1 == platform_entity {
+                if event.collision_point.x < platform_transform.translation.x {
+                    let diff = event.collision_point.x
+                        - (platform_transform.translation.x - platform_rect.width / 2.0);
+                    platform_transform.translation.x =
+                        event.collision_point.x + diff + platform_rect.width / 2.0;
+                } else {
+                    let diff = (platform_transform.translation.x + platform_rect.width / 2.0)
+                        - event.collision_point.x;
+                    platform_transform.translation.x =
+                        event.collision_point.x - diff - platform_rect.width / 2.0;
+                }
             }
         }
     }

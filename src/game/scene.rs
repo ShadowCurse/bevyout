@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 use crate::game::physics::Rectangle;
 use crate::game::GameElement;
-use crate::AppState;
+use crate::game::GameState;
 
 // TODO move to config file
 const WIDTH: f32 = 200.0;
@@ -24,7 +24,7 @@ impl Plugin for ScenePlugin {
             height: HEIGHT,
             border_color: BORDER_COLOR,
         });
-        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(scene_spawn));
+        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(scene_spawn));
     }
 }
 

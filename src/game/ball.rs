@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage, PhysicsState};
+use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
 use crate::game::GameElement;
-use crate::AppState;
+use crate::game::GameState;
 
 // TODO move to config file
 const BALL_RADIUS: f32 = 5.0;
@@ -13,14 +13,14 @@ pub struct BallPlugin;
 
 impl Plugin for BallPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(AppState::InGame).with_system(ball_spawn));
+        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(ball_spawn));
         app.add_system_set_to_stage(
             PhysicsStage::Movement,
-            SystemSet::on_update(PhysicsState::Running).with_system(ball_movement),
+            SystemSet::on_update(GameState::InGame).with_system(ball_movement),
         );
         app.add_system_set_to_stage(
             PhysicsStage::CollisionResolution,
-            SystemSet::on_update(PhysicsState::Running).with_system(ball_collision),
+            SystemSet::on_update(GameState::InGame).with_system(ball_collision),
         );
     }
 }
@@ -62,22 +62,22 @@ fn ball_movement(
     time: Res<Time>,
     mut ball: Query<(&GameBall, &mut Transform)>,
 ) {
-    let (ball, mut transform) = ball.single_mut();
+    if let Ok((ball, mut transform)) = ball.get_single_mut() {
+        transform.translation.x += ball.velocity.x * ball.speed * time.delta_seconds();
+        transform.translation.y += ball.velocity.y * ball.speed * time.delta_seconds();
 
-    transform.translation.x += ball.velocity.x * ball.speed * time.delta_seconds();
-    transform.translation.y += ball.velocity.y * ball.speed * time.delta_seconds();
-
-    if keys.pressed(KeyCode::Up) {
-        transform.translation.y += ball.speed * time.delta_seconds();
-    }
-    if keys.pressed(KeyCode::Down) {
-        transform.translation.y -= ball.speed * time.delta_seconds();
-    }
-    if keys.pressed(KeyCode::Right) {
-        transform.translation.x += ball.speed * time.delta_seconds();
-    }
-    if keys.pressed(KeyCode::Left) {
-        transform.translation.x -= ball.speed * time.delta_seconds();
+        if keys.pressed(KeyCode::Up) {
+            transform.translation.y += ball.speed * time.delta_seconds();
+        }
+        if keys.pressed(KeyCode::Down) {
+            transform.translation.y -= ball.speed * time.delta_seconds();
+        }
+        if keys.pressed(KeyCode::Right) {
+            transform.translation.x += ball.speed * time.delta_seconds();
+        }
+        if keys.pressed(KeyCode::Left) {
+            transform.translation.x -= ball.speed * time.delta_seconds();
+        }
     }
 }
 
