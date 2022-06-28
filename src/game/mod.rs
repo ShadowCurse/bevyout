@@ -27,8 +27,6 @@ impl Plugin for GamePlugin {
         app.add_plugin(BricksPlugin);
 
         app.add_system_set(SystemSet::on_update(GameState::InGame).with_system(game_pause));
-        // debug
-        app.add_system(states);
 
         app.add_system_set(
             SystemSet::on_exit(GameState::InGame).with_system(remove_all_with::<GameElement>),
@@ -55,17 +53,5 @@ fn game_pause(
     if keys.pressed(KeyCode::Escape) {
         ui_state.push(UiState::Paused).unwrap();
         game_state.push(GameState::Paused).unwrap();
-    }
-}
-
-// debug
-fn states(
-    ui_state: ResMut<State<UiState>>,
-    game_state: ResMut<State<GameState>>,
-    keys: Res<Input<KeyCode>>,
-) {
-    if keys.pressed(KeyCode::Space) {
-        println!("At ESC: {:?}", ui_state);
-        println!("At ESC: {:?}", game_state);
     }
 }

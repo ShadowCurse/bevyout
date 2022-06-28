@@ -37,6 +37,10 @@ fn setup(mut commands: Commands, scene_size: Res<SceneParams>) {
         0.0,
     );
     commands.spawn_bundle(Camera3dBundle {
+        camera: Camera {
+            priority: 1,
+            ..default()
+        },
         transform: Transform::from_translation(cam_pos).looking_at(cam_look_at, Vec3::Y),
         ..default()
     });

@@ -4,9 +4,11 @@ use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
 use crate::game::GameElement;
 use crate::game::GameState;
 
+use crate::game::platform::GamePlatform;
+use crate::ui::cursor::WorldCursor;
+
 // TODO move to config file
 const BALL_RADIUS: f32 = 5.0;
-const BALL_VELOCITY: (f32, f32) = (1.0, 1.0);
 const BALL_SPEED: f32 = 100.0;
 
 pub struct BallPlugin;
@@ -25,10 +27,18 @@ impl Plugin for BallPlugin {
     }
 }
 
+pub enum GameBallState {
+    // Attached to the platform
+    Attached,
+    // Moves freely
+    Detached,
+}
+
 #[derive(Component)]
 pub struct GameBall {
     velocity: Vec2,
     speed: f32,
+    state: GameBallState,
 }
 
 fn ball_spawn(
@@ -52,31 +62,43 @@ fn ball_spawn(
         })
         .insert(Dynamic)
         .insert(GameBall {
-            velocity: Vec2::new(BALL_VELOCITY.0, BALL_VELOCITY.1).normalize(),
+            velocity: Vec2::default(),
             speed: BALL_SPEED,
+            state: GameBallState::Attached,
         });
 }
 
 fn ball_movement(
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
-    mut ball: Query<(&GameBall, &mut Transform)>,
+    cursor: Res<WorldCursor>,
+    platform: Query<&Transform, (With<GamePlatform>, Without<GameBall>)>,
+    mut ball: Query<(&mut GameBall, &mut Transform), Without<GamePlatform>>,
 ) {
-    if let Ok((ball, mut transform)) = ball.get_single_mut() {
-        transform.translation.x += ball.velocity.x * ball.speed * time.delta_seconds();
-        transform.translation.y += ball.velocity.y * ball.speed * time.delta_seconds();
-
-        if keys.pressed(KeyCode::Up) {
-            transform.translation.y += ball.speed * time.delta_seconds();
-        }
-        if keys.pressed(KeyCode::Down) {
-            transform.translation.y -= ball.speed * time.delta_seconds();
-        }
-        if keys.pressed(KeyCode::Right) {
-            transform.translation.x += ball.speed * time.delta_seconds();
-        }
-        if keys.pressed(KeyCode::Left) {
-            transform.translation.x -= ball.speed * time.delta_seconds();
+    if let Ok((mut ball, mut transform)) = ball.get_single_mut() {
+        match ball.state {
+            GameBallState::Attached => {
+                if keys.pressed(KeyCode::Space) {
+                    ball.state = GameBallState::Detached;
+                    ball.velocity.x = transform.translation.x - cursor.0.x;
+                    ball.velocity.y = transform.translation.y - cursor.0.y;
+                    ball.velocity = ball.velocity.normalize();
+                } else {
+                    if let Ok(platform_transform) = platform.get_single() {
+                        transform.translation.x = platform_transform.translation.x;
+                        transform.translation.y = platform_transform.translation.y + 50.0;
+                    }
+                }
+            }
+            GameBallState::Detached => {
+                if keys.pressed(KeyCode::Space) {
+                    ball.state = GameBallState::Attached;
+                    ball.velocity = Vec2::ZERO;
+                } else {
+                    transform.translation.x += ball.velocity.x * ball.speed * time.delta_seconds();
+                    transform.translation.y += ball.velocity.y * ball.speed * time.delta_seconds();
+                }
+            }
         }
     }
 }

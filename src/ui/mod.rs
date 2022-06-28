@@ -1,12 +1,16 @@
 use bevy::prelude::*;
 
-mod main_menu;
-mod paused;
-mod settings;
+pub mod cursor;
+pub mod main_menu;
+pub mod paused;
+pub mod settings;
 
+use cursor::CursorPlugin;
 use main_menu::MainMenuPlugin;
 use paused::PausedPlugin;
 use settings::SettingsPlugin;
+
+use crate::game::scene::SceneParams;
 
 // TODO move to config file
 const UI_WIDTH: f32 = 500.0;
@@ -23,17 +27,18 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(ui_style_setup);
+        app.add_startup_system(ui_setup);
 
         app.add_state(UiState::MainMenu);
 
         app.add_plugin(MainMenuPlugin);
         app.add_plugin(PausedPlugin);
         app.add_plugin(SettingsPlugin);
+        app.add_plugin(CursorPlugin);
     }
 }
 
-/// Game states
+/// Ui states
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum UiState {
     MainMenu,
@@ -53,7 +58,23 @@ pub struct UiStyle {
     btn_style_text: TextStyle,
 }
 
-fn ui_style_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>, scene_size: Res<SceneParams>) {
+    let cam_pos = Vec3::new(
+        scene_size.width as f32 / 2.0,
+        scene_size.height as f32 / 2.0,
+        500.0,
+    );
+    commands
+        .spawn_bundle(Camera2dBundle {
+            camera: Camera {
+                // priority: 2,
+                is_active: false,
+                ..default()
+            },
+            transform: Transform::from_translation(cam_pos),
+            ..default()
+        })
+        .insert(CameraUi { is_enabled: true });
     commands.insert_resource(UiStyle {
         btn_style: Style {
             size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
