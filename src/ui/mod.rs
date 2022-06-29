@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*};
 
 pub mod cursor;
 pub mod main_menu;
@@ -9,8 +9,6 @@ use cursor::CursorPlugin;
 use main_menu::MainMenuPlugin;
 use paused::PausedPlugin;
 use settings::SettingsPlugin;
-
-use crate::game::scene::SceneParams;
 
 // TODO move to config file
 const UI_WIDTH: f32 = 500.0;
@@ -58,23 +56,24 @@ pub struct UiStyle {
     btn_style_text: TextStyle,
 }
 
-fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>, scene_size: Res<SceneParams>) {
-    let cam_pos = Vec3::new(
-        scene_size.width as f32 / 2.0,
-        scene_size.height as f32 / 2.0,
-        500.0,
-    );
+#[derive(Component, Debug, Clone)]
+pub struct GameUiCamera;
+
+fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn_bundle(Camera2dBundle {
             camera: Camera {
-                // priority: 2,
-                is_active: false,
+                priority: 2,
                 ..default()
             },
-            transform: Transform::from_translation(cam_pos),
+            camera_2d: Camera2d {
+                clear_color: ClearColorConfig::None,
+            },
             ..default()
         })
-        .insert(CameraUi { is_enabled: true });
+        .insert(CameraUi { is_enabled: true })
+        .insert(GameUiCamera);
+
     commands.insert_resource(UiStyle {
         btn_style: Style {
             size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),
