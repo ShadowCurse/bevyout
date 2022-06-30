@@ -1,4 +1,4 @@
-use bevy::{core_pipeline::clear_color::ClearColorConfig, prelude::*};
+use bevy::prelude::*;
 
 pub mod cursor;
 pub mod main_menu;
@@ -60,20 +60,6 @@ pub struct UiStyle {
 pub struct GameUiCamera;
 
 fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
-    commands
-        .spawn_bundle(Camera2dBundle {
-            camera: Camera {
-                priority: 2,
-                ..default()
-            },
-            camera_2d: Camera2d {
-                clear_color: ClearColorConfig::None,
-            },
-            ..default()
-        })
-        .insert(CameraUi { is_enabled: true })
-        .insert(GameUiCamera);
-
     commands.insert_resource(UiStyle {
         btn_style: Style {
             size: Size::new(Val::Px(BUTTON_WIDTH), Val::Px(BUTTON_HEIGHT)),

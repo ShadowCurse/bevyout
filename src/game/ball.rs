@@ -78,10 +78,10 @@ fn ball_movement(
     if let Ok((mut ball, mut transform)) = ball.get_single_mut() {
         match ball.state {
             GameBallState::Attached => {
-                if keys.pressed(KeyCode::Space) {
+                if keys.just_pressed(KeyCode::Space) {
                     ball.state = GameBallState::Detached;
-                    ball.velocity.x = transform.translation.x - cursor.0.x;
-                    ball.velocity.y = transform.translation.y - cursor.0.y;
+                    ball.velocity.x = cursor.0.x - transform.translation.x;
+                    ball.velocity.y = cursor.0.y - transform.translation.y;
                     ball.velocity = ball.velocity.normalize();
                 } else {
                     if let Ok(platform_transform) = platform.get_single() {
@@ -91,7 +91,7 @@ fn ball_movement(
                 }
             }
             GameBallState::Detached => {
-                if keys.pressed(KeyCode::Space) {
+                if keys.just_pressed(KeyCode::Space) {
                     ball.state = GameBallState::Attached;
                     ball.velocity = Vec2::ZERO;
                 } else {

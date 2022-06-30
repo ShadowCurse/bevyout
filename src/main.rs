@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::render::camera::ScalingMode;
 
 mod game;
 mod ui;
@@ -37,16 +36,14 @@ fn setup(mut commands: Commands, scene_size: Res<SceneParams>) {
         scene_size.height as f32 / 2.0,
         0.0,
     );
-    commands
-        .spawn_bundle(Camera3dBundle {
-            camera: Camera {
-                priority: 1,
-                ..default()
-            },
-            transform: Transform::from_translation(cam_pos).looking_at(cam_look_at, Vec3::Y),
+    commands.spawn_bundle(Camera3dBundle {
+        camera: Camera {
+            priority: 1,
             ..default()
-        })
-        .insert(CameraUi { is_enabled: false });
+        },
+        transform: Transform::from_translation(cam_pos).looking_at(cam_look_at, Vec3::Y),
+        ..default()
+    });
 
     // light
     commands.spawn_bundle(DirectionalLightBundle {
