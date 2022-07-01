@@ -1,11 +1,13 @@
 use bevy::prelude::*;
 
 pub mod cursor;
+pub mod hud;
 pub mod main_menu;
 pub mod paused;
 pub mod settings;
 
 use cursor::CursorPlugin;
+use hud::HudPlugin;
 use main_menu::MainMenuPlugin;
 use paused::PausedPlugin;
 use settings::SettingsPlugin;
@@ -29,10 +31,11 @@ impl Plugin for UiPlugin {
 
         app.add_state(UiState::MainMenu);
 
+        app.add_plugin(CursorPlugin);
+        app.add_plugin(HudPlugin);
         app.add_plugin(MainMenuPlugin);
         app.add_plugin(PausedPlugin);
         app.add_plugin(SettingsPlugin);
-        app.add_plugin(CursorPlugin);
     }
 }
 
@@ -53,7 +56,7 @@ pub struct UiStyle {
     btn_color_pressed: Color,
     menu_style: Style,
     menu_color: Color,
-    btn_style_text: TextStyle,
+    text_style: TextStyle,
 }
 
 #[derive(Component, Debug, Clone)]
@@ -85,10 +88,45 @@ fn ui_setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ..default()
         },
         menu_color: UI_BACKGROUND,
-        btn_style_text: TextStyle {
+        text_style: TextStyle {
             font: asset_server.load("fonts/monaco.ttf"),
             font_size: 20.0,
             color: UI_FOREGROUND,
         },
     });
+}
+
+fn spawn_button<B, M>(
+    commands: &mut Commands,
+    parent: Entity,
+    style: &UiStyle,
+    button: B,
+    marker: M,
+) where
+    B: Component + std::fmt::Debug,
+    M: Component + Copy,
+{
+    let child = commands
+        .spawn_bundle(ButtonBundle {
+            style: style.btn_style.clone(),
+            color: style.btn_color_normal.into(),
+            ..default()
+        })
+        .with_children(|parent| {
+            parent
+                .spawn_bundle(TextBundle {
+                    text: Text::with_section(
+                        format!("{:?}", button),
+                        style.text_style.clone(),
+                        Default::default(),
+                    ),
+                    ..default()
+                })
+                .insert(marker);
+        })
+        .insert(button)
+        .insert(marker)
+        .id();
+
+    commands.entity(parent).push_children(&[child]);
 }

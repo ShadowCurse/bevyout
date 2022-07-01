@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
 use crate::game::GameState;
-use crate::ui::{UiState, UiStyle};
+use crate::ui::{spawn_button, UiState, UiStyle};
 use crate::utils::remove_all_with;
 
 pub struct PausedPlugin;
@@ -40,35 +40,27 @@ fn paused_setup(mut commands: Commands, style: Res<UiStyle>) {
         .insert(UiPausedElement)
         .id();
 
-    spawn_button(&mut commands, ui, &style, PausedButton::Resume);
-    spawn_button(&mut commands, ui, &style, PausedButton::Settings);
-    spawn_button(&mut commands, ui, &style, PausedButton::BackToMainMenu);
-}
-
-fn spawn_button(commands: &mut Commands, parent: Entity, style: &UiStyle, button: PausedButton) {
-    let child = commands
-        .spawn_bundle(ButtonBundle {
-            style: style.btn_style.clone(),
-            color: style.btn_color_normal.into(),
-            ..default()
-        })
-        .with_children(|parent| {
-            parent
-                .spawn_bundle(TextBundle {
-                    text: Text::with_section(
-                        format!("{:?}", button),
-                        style.btn_style_text.clone(),
-                        Default::default(),
-                    ),
-                    ..default()
-                })
-                .insert(UiPausedElement);
-        })
-        .insert(UiPausedElement)
-        .insert(button)
-        .id();
-
-    commands.entity(parent).push_children(&[child]);
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        PausedButton::Resume,
+        UiPausedElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        PausedButton::Settings,
+        UiPausedElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        PausedButton::BackToMainMenu,
+        UiPausedElement,
+    );
 }
 
 fn button_system(

@@ -1,7 +1,7 @@
 use bevy::{app::AppExit, prelude::*};
 
 use crate::game::GameState;
-use crate::ui::{UiState, UiStyle};
+use crate::ui::{spawn_button, UiState, UiStyle};
 use crate::utils::remove_all_with;
 
 pub struct MainMenuPlugin;
@@ -41,35 +41,27 @@ fn main_menu_setup(mut commands: Commands, style: Res<UiStyle>) {
         .insert(UiMainMenuElement)
         .id();
 
-    spawn_button(&mut commands, ui, &style, MainMenuButton::Start);
-    spawn_button(&mut commands, ui, &style, MainMenuButton::Settings);
-    spawn_button(&mut commands, ui, &style, MainMenuButton::Exit);
-}
-
-fn spawn_button(commands: &mut Commands, parent: Entity, style: &UiStyle, button: MainMenuButton) {
-    let child = commands
-        .spawn_bundle(ButtonBundle {
-            style: style.btn_style.clone(),
-            color: style.btn_color_normal.into(),
-            ..default()
-        })
-        .with_children(|parent| {
-            parent
-                .spawn_bundle(TextBundle {
-                    text: Text::with_section(
-                        format!("{:?}", button),
-                        style.btn_style_text.clone(),
-                        Default::default(),
-                    ),
-                    ..default()
-                })
-                .insert(UiMainMenuElement);
-        })
-        .insert(UiMainMenuElement)
-        .insert(button)
-        .id();
-
-    commands.entity(parent).push_children(&[child]);
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        MainMenuButton::Start,
+        UiMainMenuElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        MainMenuButton::Settings,
+        UiMainMenuElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        MainMenuButton::Exit,
+        UiMainMenuElement,
+    );
 }
 
 fn button_system(

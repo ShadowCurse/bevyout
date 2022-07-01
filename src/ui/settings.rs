@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::ui::{UiState, UiStyle};
+use crate::ui::{spawn_button, UiState, UiStyle};
 use crate::utils::remove_all_with;
 
 pub struct SettingsPlugin;
@@ -36,36 +36,34 @@ fn settings_setup(mut commands: Commands, style: Res<UiStyle>) {
         .insert(UiSettingsElement)
         .id();
 
-    spawn_button(&mut commands, ui, &style, SettingsButton::Gameplay);
-    spawn_button(&mut commands, ui, &style, SettingsButton::Display);
-    spawn_button(&mut commands, ui, &style, SettingsButton::Sound);
-    spawn_button(&mut commands, ui, &style, SettingsButton::Back);
-}
-
-fn spawn_button(commands: &mut Commands, parent: Entity, style: &UiStyle, button: SettingsButton) {
-    let child = commands
-        .spawn_bundle(ButtonBundle {
-            style: style.btn_style.clone(),
-            color: style.btn_color_normal.into(),
-            ..default()
-        })
-        .with_children(|parent| {
-            parent
-                .spawn_bundle(TextBundle {
-                    text: Text::with_section(
-                        format!("{:?}", button),
-                        style.btn_style_text.clone(),
-                        Default::default(),
-                    ),
-                    ..default()
-                })
-                .insert(UiSettingsElement);
-        })
-        .insert(UiSettingsElement)
-        .insert(button)
-        .id();
-
-    commands.entity(parent).push_children(&[child]);
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        SettingsButton::Gameplay,
+        UiSettingsElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        SettingsButton::Display,
+        UiSettingsElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        SettingsButton::Sound,
+        UiSettingsElement,
+    );
+    spawn_button(
+        &mut commands,
+        ui,
+        &style,
+        SettingsButton::Back,
+        UiSettingsElement,
+    );
 }
 
 fn button_system(
