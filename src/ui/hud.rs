@@ -1,0 +1,57 @@
+use bevy::prelude::*;
+
+use crate::ui::{UiState, UiStyle};
+use crate::utils::remove_all_with;
+
+pub struct HudPlugin;
+
+impl Plugin for HudPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_system_set(SystemSet::on_enter(UiState::InGame).with_system(hud_setup));
+        app.add_system_set(
+            SystemSet::on_pause(UiState::InGame).with_system(remove_all_with::<UiHudElement>),
+        );
+        app.add_system_set(SystemSet::on_resume(UiState::InGame).with_system(hud_setup));
+        app.add_system_set(
+            SystemSet::on_exit(UiState::InGame).with_system(remove_all_with::<UiHudElement>),
+        );
+    }
+}
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct UiHudElement;
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct LifesCount;
+
+fn hud_setup(mut cmd: Commands, style: Res<UiStyle>) {
+    cmd.spawn_bundle(NodeBundle {
+        color: UiColor(Color::rgba(0.5, 0.5, 0.5, 0.0)),
+        style: Style {
+            size: Size::new(Val::Auto, Val::Auto),
+            margin: UiRect::all(Val::Auto),
+            align_self: AlignSelf::Center,
+            flex_direction: FlexDirection::ColumnReverse,
+            align_items: AlignItems::Stretch,
+            justify_content: JustifyContent::Center,
+            ..Default::default()
+        },
+        ..Default::default()
+    })
+    .insert(UiHudElement);
+
+    // lifes count
+    cmd.spawn_bundle(TextBundle {
+        text: Text::with_section(
+            "Lifes: ---",
+            style.text_style.clone(),
+            TextAlignment {
+                vertical: VerticalAlign::Bottom,
+                horizontal: HorizontalAlign::Right,
+            },
+        ),
+        ..Default::default()
+    })
+    .insert(LifesCount)
+    .insert(UiHudElement);
+}
