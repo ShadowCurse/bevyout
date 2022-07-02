@@ -1,15 +1,12 @@
 use bevy::prelude::*;
 
+use crate::config::GameConfig;
 use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
 use crate::game::GameElement;
 use crate::game::GameState;
 
 use crate::game::platform::GamePlatform;
 use crate::ui::cursor::WorldCursor;
-
-// TODO move to config file
-const BALL_RADIUS: f32 = 5.0;
-const BALL_SPEED: f32 = 100.0;
 
 pub struct BallPlugin;
 
@@ -42,6 +39,7 @@ pub struct GameBall {
 }
 
 fn ball_spawn(
+    config: Res<GameConfig>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -49,7 +47,7 @@ fn ball_spawn(
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Icosphere {
-                radius: BALL_RADIUS,
+                radius: config.ball_radius,
                 subdivisions: 10,
             })),
             material: materials.add(Color::TEAL.into()),
@@ -58,12 +56,12 @@ fn ball_spawn(
         })
         .insert(GameElement)
         .insert(Ball {
-            radius: BALL_RADIUS,
+            radius: config.ball_radius,
         })
         .insert(Dynamic)
         .insert(GameBall {
             velocity: Vec2::default(),
-            speed: BALL_SPEED,
+            speed: config.ball_speed,
             state: GameBallState::Attached,
         });
 }

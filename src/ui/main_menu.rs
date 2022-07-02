@@ -1,7 +1,8 @@
 use bevy::{app::AppExit, prelude::*};
 
+use crate::config::UiConfig;
 use crate::game::GameState;
-use crate::ui::{spawn_button, UiState, UiStyle};
+use crate::ui::{spawn_button, UiState};
 use crate::utils::remove_all_with;
 
 pub struct MainMenuPlugin;
@@ -31,11 +32,11 @@ enum MainMenuButton {
     Exit,
 }
 
-fn main_menu_setup(mut commands: Commands, style: Res<UiStyle>) {
+fn main_menu_setup(mut commands: Commands, config: Res<UiConfig>) {
     let ui = commands
         .spawn_bundle(NodeBundle {
-            style: style.menu_style.clone(),
-            color: style.menu_color.into(),
+            style: config.menu_style.clone(),
+            color: config.menu_color.into(),
             ..default()
         })
         .insert(UiMainMenuElement)
@@ -44,28 +45,28 @@ fn main_menu_setup(mut commands: Commands, style: Res<UiStyle>) {
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         MainMenuButton::Start,
         UiMainMenuElement,
     );
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         MainMenuButton::Settings,
         UiMainMenuElement,
     );
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         MainMenuButton::Exit,
         UiMainMenuElement,
     );
 }
 
 fn button_system(
-    style: Res<UiStyle>,
+    style: Res<UiConfig>,
     mut ui_state: ResMut<State<UiState>>,
     mut game_state: ResMut<State<GameState>>,
     mut interaction_query: Query<

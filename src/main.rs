@@ -1,10 +1,12 @@
 use bevy::prelude::*;
 
+mod config;
 mod game;
 mod ui;
 mod utils;
 
-use game::{scene::SceneParams, GamePlugin};
+use config::ConfigPlugin;
+use game::GamePlugin;
 use ui::UiPlugin;
 
 fn main() {
@@ -17,40 +19,9 @@ fn main() {
     app.insert_resource(ClearColor(Color::BLACK));
 
     app.add_plugins(DefaultPlugins);
+    app.add_plugin(ConfigPlugin);
     app.add_plugin(UiPlugin);
     app.add_plugin(GamePlugin);
 
-    app.add_startup_system(setup);
     app.run();
-}
-
-fn setup(mut commands: Commands, scene_size: Res<SceneParams>) {
-    // camera
-    let cam_pos = Vec3::new(
-        scene_size.width as f32 / 2.0,
-        scene_size.height as f32 / 2.0,
-        500.0,
-    );
-    let cam_look_at = Vec3::new(
-        scene_size.width as f32 / 2.0,
-        scene_size.height as f32 / 2.0,
-        0.0,
-    );
-    commands.spawn_bundle(Camera3dBundle {
-        camera: Camera {
-            priority: 1,
-            ..default()
-        },
-        transform: Transform::from_translation(cam_pos).looking_at(cam_look_at, Vec3::Y),
-        ..default()
-    });
-
-    // light
-    commands.spawn_bundle(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            illuminance: 10000.0,
-            ..Default::default()
-        },
-        ..Default::default()
-    });
 }

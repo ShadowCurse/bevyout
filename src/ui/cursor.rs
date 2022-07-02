@@ -1,10 +1,7 @@
 use bevy::prelude::*;
 
+use crate::config::UiConfig;
 use crate::ui::UiState;
-
-// TODO move to config file
-const CURSOR_COLOR: Color = Color::GREEN;
-const CURSOR_RADIUS: f32 = 2.0;
 
 pub struct CursorPlugin;
 
@@ -25,6 +22,7 @@ pub struct WorldCursor(pub Vec3);
 pub struct GameCursor;
 
 fn cursor_spawn(
+    config: Res<UiConfig>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
@@ -32,10 +30,10 @@ fn cursor_spawn(
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Icosphere {
-                radius: CURSOR_RADIUS,
+                radius: config.cursor_radius,
                 subdivisions: 10,
             })),
-            material: materials.add(CURSOR_COLOR.into()),
+            material: materials.add(config.cursor_color.into()),
             ..default()
         })
         .insert(GameCursor);

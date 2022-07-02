@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
-use crate::ui::{spawn_button, UiState, UiStyle};
+use crate::config::UiConfig;
+use crate::ui::{spawn_button, UiState};
 use crate::utils::remove_all_with;
 
 pub struct SettingsPlugin;
@@ -26,11 +27,11 @@ enum SettingsButton {
     Back,
 }
 
-fn settings_setup(mut commands: Commands, style: Res<UiStyle>) {
+fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
     let ui = commands
         .spawn_bundle(NodeBundle {
-            style: style.menu_style.clone(),
-            color: style.menu_color.into(),
+            style: config.menu_style.clone(),
+            color: config.menu_color.into(),
             ..default()
         })
         .insert(UiSettingsElement)
@@ -39,35 +40,35 @@ fn settings_setup(mut commands: Commands, style: Res<UiStyle>) {
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         SettingsButton::Gameplay,
         UiSettingsElement,
     );
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         SettingsButton::Display,
         UiSettingsElement,
     );
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         SettingsButton::Sound,
         UiSettingsElement,
     );
     spawn_button(
         &mut commands,
         ui,
-        &style,
+        &config,
         SettingsButton::Back,
         UiSettingsElement,
     );
 }
 
 fn button_system(
-    style: Res<UiStyle>,
+    style: Res<UiConfig>,
     mut ui_state: ResMut<State<UiState>>,
     mut interaction_query: Query<
         (&SettingsButton, &Interaction, &mut UiColor),

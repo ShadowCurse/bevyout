@@ -1,14 +1,9 @@
 use bevy::prelude::*;
 
+use crate::config::GameConfig;
 use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
-use crate::game::scene::SceneParams;
 use crate::game::GameElement;
 use crate::game::GameState;
-
-// TODO move to config file
-const PLATFORM_WIDTH: f32 = 50.0;
-const PLATFORM_HEIGHT: f32 = 10.0;
-const PLATFORM_SPEED: f32 = 100.0;
 
 pub struct PlatformPlugin;
 
@@ -31,31 +26,41 @@ pub struct GamePlatform {
     speed: f32,
 }
 
+pub struct PlatformLifes {
+    pub max: u32,
+    pub current: u32,
+}
+
 fn platform_spawn(
+    config: Res<GameConfig>,
     mut commands: Commands,
-    scene_size: Res<SceneParams>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    commands.insert_resource(PlatformLifes {
+        max: config.platform_lifes,
+        current: config.platform_lifes,
+    });
+
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
-                PLATFORM_WIDTH,
-                PLATFORM_HEIGHT,
+                config.platform_width,
+                config.platform_height,
                 1.0,
             ))),
             material: materials.add(Color::FUCHSIA.into()),
-            transform: Transform::from_xyz(scene_size.width as f32 / 2.0, 10.0, 0.0),
+            transform: Transform::from_xyz(config.scene_width as f32 / 2.0, 10.0, 0.0),
             ..default()
         })
         .insert(GameElement)
         .insert(Rectangle {
-            width: PLATFORM_WIDTH,
-            height: PLATFORM_HEIGHT,
+            width: config.platform_width,
+            height: config.platform_height,
         })
         .insert(Dynamic)
         .insert(GamePlatform {
-            speed: PLATFORM_SPEED,
+            speed: config.platform_speed,
         });
 }
 

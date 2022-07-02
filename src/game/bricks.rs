@@ -1,19 +1,9 @@
 use bevy::prelude::*;
 
+use crate::config::GameConfig;
 use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
-
-// TODO move to config file
-const BRICKS_POS_X: f32 = 100.0;
-const BRICKS_POS_Y: f32 = 200.0;
-const BRICKS_WIDTH: f32 = 15.0;
-const BRICKS_HEIGHT: f32 = 10.0;
-const BRICKS_COLS: u32 = 9;
-const BRICKS_ROWS: u32 = 5;
-const BRICKS_GAP_X: f32 = 5.0;
-const BRICKS_GAP_Y: f32 = 5.0;
-const BRICKS_HEALTH: u32 = 1;
 
 pub struct BricksPlugin;
 
@@ -32,27 +22,39 @@ pub struct GameBrick {
     health: u32,
 }
 
+pub struct BricksCount {
+    pub total: u32,
+    pub current: u32,
+}
+
 fn bricks_spawn(
+    config: Res<GameConfig>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let total_bricks = config.bricks_cols * config.bricks_rows;
+    commands.insert_resource(BricksCount {
+        total: total_bricks,
+        current: total_bricks,
+    });
+
     let brick_mesh = meshes.add(Mesh::from(shape::Box::new(
-        BRICKS_WIDTH,
-        BRICKS_HEIGHT,
+        config.bricks_width,
+        config.bricks_height,
         1.0,
     )));
 
     let brick_material = materials.add(Color::INDIGO.into());
 
     for pos in spawn_grid(
-        Vec2::new(BRICKS_POS_X, BRICKS_POS_Y),
-        BRICKS_ROWS,
-        BRICKS_COLS,
-        BRICKS_WIDTH,
-        BRICKS_HEIGHT,
-        BRICKS_GAP_X,
-        BRICKS_GAP_Y,
+        Vec2::new(config.bricks_pos_x, config.bricks_pos_y),
+        config.bricks_rows,
+        config.bricks_cols,
+        config.bricks_width,
+        config.bricks_height,
+        config.bricks_gap_x,
+        config.bricks_gap_y,
     ) {
         commands
             .spawn_bundle(PbrBundle {
@@ -63,11 +65,11 @@ fn bricks_spawn(
             })
             .insert(GameElement)
             .insert(Rectangle {
-                width: BRICKS_WIDTH,
-                height: BRICKS_HEIGHT,
+                width: config.bricks_width,
+                height: config.bricks_height,
             })
             .insert(GameBrick {
-                health: BRICKS_HEALTH,
+                health: config.bricks_health,
             });
     }
 }
@@ -108,6 +110,7 @@ fn spawn_grid(
 
 fn bricks_collision(
     mut commands: Commands,
+    mut bricks_count: ResMut<BricksCount>,
     mut collision_events: EventReader<CollisionEvent>,
     mut bricks: Query<(Entity, &mut GameBrick)>,
 ) {
@@ -115,6 +118,7 @@ fn bricks_collision(
         if let Ok((brick, mut game_brick)) = bricks.get_mut(event.entity2) {
             game_brick.health -= 1;
             if game_brick.health == 0 {
+                bricks_count.current -= 1;
                 commands.entity(brick).despawn();
             }
         }
