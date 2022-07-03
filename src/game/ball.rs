@@ -33,9 +33,9 @@ pub enum GameBallState {
 
 #[derive(Component)]
 pub struct GameBall {
-    velocity: Vec2,
-    speed: f32,
-    state: GameBallState,
+    pub velocity: Vec2,
+    pub speed: f32,
+    pub state: GameBallState,
 }
 
 fn ball_spawn(

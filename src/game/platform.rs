@@ -5,6 +5,8 @@ use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
 
+use super::ball::{GameBall, GameBallState};
+
 pub struct PlatformPlugin;
 
 impl Plugin for PlatformPlugin {
@@ -12,7 +14,9 @@ impl Plugin for PlatformPlugin {
         app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(platform_spawn));
         app.add_system_set_to_stage(
             PhysicsStage::Movement,
-            SystemSet::on_update(GameState::InGame).with_system(platform_movement),
+            SystemSet::on_update(GameState::InGame)
+                .with_system(platform_movement)
+                .with_system(platform_lifes),
         );
         app.add_system_set_to_stage(
             PhysicsStage::CollisionResolution,
@@ -77,6 +81,23 @@ fn platform_movement(
         if keys.pressed(KeyCode::D) {
             transform.translation.x += platform.speed * time.delta_seconds();
         }
+    }
+}
+
+fn platform_lifes(
+    platform: Query<&Transform, With<GamePlatform>>,
+    mut balls: Query<(&Transform, &mut GameBall), Without<GamePlatform>>,
+    mut lifes: ResMut<PlatformLifes>,
+) {
+    // if more than 1 ball
+    if 1 < balls.iter().size_hint().0 {
+        return;
+    }
+    let (ball, mut game_ball) = balls.get_single_mut().unwrap();
+    let platform = platform.get_single().unwrap();
+    if ball.translation.y < platform.translation.y {
+        lifes.current -= 1;
+        game_ball.state = GameBallState::Attached;
     }
 }
 
