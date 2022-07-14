@@ -20,7 +20,7 @@ impl Plugin for GamePlugin {
     fn build(&self, app: &mut App) {
         app.add_state(GameState::NotInGame);
 
-        app.add_plugin(PhysicsPlugin { debug: true });
+        app.add_plugin(PhysicsPlugin { debug: false });
         app.add_plugin(ScenePlugin);
         app.add_plugin(PlatformPlugin);
         app.add_plugin(BallPlugin);
