@@ -17,7 +17,7 @@ fn main() {
 
     app.insert_resource(bevy::log::LogSettings {
         level: bevy::log::Level::DEBUG,
-        ..Default::default()
+        ..default()
     });
     app.insert_resource(WindowDescriptor {
         present_mode: bevy::window::PresentMode::Immediate,

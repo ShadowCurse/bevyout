@@ -105,11 +105,7 @@ fn spawn_button<B, M>(
         .with_children(|parent| {
             parent
                 .spawn_bundle(TextBundle {
-                    text: Text::with_section(
-                        format!("{:?}", button),
-                        style.text_style.clone(),
-                        Default::default(),
-                    ),
+                    text: Text::from_section(format!("{:?}", button), style.text_style.clone()),
                     ..default()
                 })
                 .insert(marker);

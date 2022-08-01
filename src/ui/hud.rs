@@ -37,23 +37,21 @@ fn hud_setup(mut cmd: Commands, config: Res<UiConfig>) {
             flex_direction: FlexDirection::ColumnReverse,
             align_items: AlignItems::Stretch,
             justify_content: JustifyContent::Center,
-            ..Default::default()
+            ..default()
         },
-        ..Default::default()
+        ..default()
     })
     .insert(UiHudElement);
 
     // lifes count
     cmd.spawn_bundle(TextBundle {
-        text: Text::with_section(
-            "Lifes: ---",
-            config.text_style.clone(),
+        text: Text::from_section("Lifes: ---", config.text_style.clone()).with_alignment(
             TextAlignment {
                 vertical: VerticalAlign::Bottom,
                 horizontal: HorizontalAlign::Right,
             },
         ),
-        ..Default::default()
+        ..default()
     })
     .insert(LifesCount)
     .insert(UiHudElement);

@@ -73,8 +73,8 @@ fn world_cursor_system(
 
             // calculation of point on the xy plane
             // same as -camera_transform.translation.dot(-Vec3::Z) / ray_world.dot(-Vec3::Z);
-            let t = camera_transform.translation.z / -ray_world.z;
-            let xy_pos = camera_transform.translation + ray_world * t;
+            let t = camera_transform.translation().z / -ray_world.z;
+            let xy_pos = camera_transform.translation() + ray_world * t;
 
             crs.0 = xy_pos;
         }
