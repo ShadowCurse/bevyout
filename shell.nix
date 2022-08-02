@@ -10,15 +10,10 @@ pkgs.mkShell {
     pkgs.alsaLib
   ]}"'';
   buildInputs = with pkgs; [
-
     mold
-    # lld
     clang
-
-    # pkgconfig
-    # vulkan-tools
-    # vulkan-headers
-    # vulkan-loader
-    # vulkan-validation-layers
+    pkgconfig
+    udev
+    alsaLib
   ];
 }
