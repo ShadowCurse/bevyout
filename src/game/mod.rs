@@ -40,6 +40,7 @@ pub enum GameState {
     NotInGame,
     InGame,
     Paused,
+    EndGame,
 }
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
