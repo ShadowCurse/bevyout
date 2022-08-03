@@ -34,6 +34,7 @@ pub enum GameBallState {
 #[derive(Component)]
 pub struct GameBall {
     pub velocity: Vec2,
+    pub radius: f32,
     pub speed: f32,
     pub state: GameBallState,
 }
@@ -61,6 +62,7 @@ fn ball_spawn(
         .insert(Dynamic)
         .insert(GameBall {
             velocity: Vec2::default(),
+            radius: config.ball_radius,
             speed: config.ball_speed,
             state: GameBallState::Attached,
         });
@@ -70,7 +72,7 @@ fn ball_movement(
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
     cursor: Res<WorldCursor>,
-    platform: Query<&Transform, (With<GamePlatform>, Without<GameBall>)>,
+    platform: Query<(&Transform, &GamePlatform), Without<GameBall>>,
     mut ball: Query<(&mut GameBall, &mut Transform), Without<GamePlatform>>,
 ) {
     if let Ok((mut ball, mut transform)) = ball.get_single_mut() {
@@ -81,11 +83,9 @@ fn ball_movement(
                     ball.velocity.x = cursor.0.x - transform.translation.x;
                     ball.velocity.y = cursor.0.y - transform.translation.y;
                     ball.velocity = ball.velocity.normalize();
-                } else {
-                    if let Ok(platform_transform) = platform.get_single() {
-                        transform.translation.x = platform_transform.translation.x;
-                        transform.translation.y = platform_transform.translation.y + 50.0;
-                    }
+                } else if let Ok((platform_transform, platform)) = platform.get_single() {
+                    transform.translation.x = platform_transform.translation.x;
+                    transform.translation.y = platform_transform.translation.y + platform.height * 0.5 + ball.radius;
                 }
             }
             GameBallState::Detached => {

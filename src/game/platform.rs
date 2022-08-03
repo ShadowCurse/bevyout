@@ -28,7 +28,9 @@ impl Plugin for PlatformPlugin {
 
 #[derive(Component)]
 pub struct GamePlatform {
-    speed: f32,
+    pub width: f32,
+    pub height: f32,
+    pub speed: f32,
 }
 
 pub struct PlatformLifes {
@@ -65,6 +67,8 @@ fn platform_spawn(
         })
         .insert(Dynamic)
         .insert(GamePlatform {
+            width: config.platform_width,
+            height: config.platform_height,
             speed: config.platform_speed,
         });
 }
