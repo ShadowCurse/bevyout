@@ -4,9 +4,9 @@ use crate::config::GameConfig;
 use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
-use crate::ui::UiState;
 
 use super::ball::{GameBall, GameBallState};
+use super::events::GameEvents;
 
 pub struct PlatformPlugin;
 
@@ -93,8 +93,7 @@ fn platform_lifes(
     platform: Query<&Transform, With<GamePlatform>>,
     mut balls: Query<(&Transform, &mut GameBall), Without<GamePlatform>>,
     mut lifes: ResMut<PlatformLifes>,
-    mut ui_state: ResMut<State<UiState>>,
-    mut game_state: ResMut<State<GameState>>,
+    mut game_events: EventWriter<GameEvents>,
 ) {
     // if more than 1 ball
     if 1 < balls.iter().size_hint().0 {
@@ -107,8 +106,7 @@ fn platform_lifes(
         game_ball.state = GameBallState::Attached;
     }
     if lifes.current == 0 {
-        ui_state.push(UiState::EndGame).unwrap();
-        game_state.push(GameState::EndGame).unwrap();
+        game_events.send(GameEvents::EndGame);
     }
 }
 
