@@ -3,9 +3,6 @@ use bevy::prelude::*;
 use crate::ui::UiState;
 use super::GameState;
 
-#[derive(Debug, Clone, Default)]
-pub struct EndGame;
-
 pub enum GameEvents {
     EndGame,
     Pause,
