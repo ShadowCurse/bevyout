@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::config::GameConfig;
+use crate::game::events::GameEvents;
 use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
@@ -94,18 +95,15 @@ fn spawn_grid(
         pos.x -= (gap_x + width) * ((cols - 1) / 2) as f32;
     }
 
-    (0..cols)
-        .map(move |x| {
-            (0..rows).map(move |y| {
-                Vec3::new(
-                    pos.x + x as f32 * (width + gap_x),
-                    pos.y + y as f32 * (height + gap_y),
-                    0.0,
-                )
-            })
+    (0..cols).flat_map(move |x| {
+        (0..rows).map(move |y| {
+            Vec3::new(
+                pos.x + x as f32 * (width + gap_x),
+                pos.y + y as f32 * (height + gap_y),
+                0.0,
+            )
         })
-        .flatten()
-        .into_iter()
+    })
 }
 
 fn bricks_collision(
@@ -113,6 +111,7 @@ fn bricks_collision(
     mut bricks_count: ResMut<BricksCount>,
     mut collision_events: EventReader<CollisionEvent>,
     mut bricks: Query<(Entity, &mut GameBrick)>,
+    mut game_events: EventWriter<GameEvents>,
 ) {
     for event in collision_events.iter() {
         if let Ok((brick, mut game_brick)) = bricks.get_mut(event.entity2) {
@@ -122,5 +121,8 @@ fn bricks_collision(
                 commands.entity(brick).despawn();
             }
         }
+    }
+    if bricks_count.current == 0 {
+        game_events.send(GameEvents::EndGame);
     }
 }

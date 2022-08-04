@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
+use crate::game::GameState;
 use crate::ui::UiState;
-use super::GameState;
 
 pub enum GameEvents {
     EndGame,
@@ -16,7 +16,7 @@ impl Plugin for EventsPlugin {
         app.add_system_set(
             SystemSet::on_update(GameState::InGame)
                 .with_system(keyboard_input)
-                .with_system(handle_game_events)
+                .with_system(handle_game_events),
         );
     }
 }
