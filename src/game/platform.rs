@@ -1,12 +1,12 @@
 use bevy::prelude::*;
 
 use crate::config::GameConfig;
+use crate::events::GameEvents;
 use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
 
 use super::ball::{GameBall, GameBallState};
-use super::events::GameEvents;
 
 pub struct PlatformPlugin;
 

@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-use crate::config::GameConfig;
-use crate::game::events::GameEvents;
+use crate::config::{CurrentGameSettings, GameConfig};
+use crate::events::GameEvents;
 use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
@@ -107,6 +107,9 @@ fn spawn_grid(
 }
 
 fn bricks_collision(
+    audio: Res<Audio>,
+    config: Res<GameConfig>,
+    settings: Res<CurrentGameSettings>,
     mut commands: Commands,
     mut bricks_count: ResMut<BricksCount>,
     mut collision_events: EventReader<CollisionEvent>,
@@ -115,6 +118,14 @@ fn bricks_collision(
 ) {
     for event in collision_events.iter() {
         if let Ok((brick, mut game_brick)) = bricks.get_mut(event.entity2) {
+            audio.play_with_settings(
+                config.bricks_sound.clone(),
+                PlaybackSettings {
+                    repeat: false,
+                    volume: settings.0.sound_volume,
+                    speed: 1.0,
+                },
+            );
             game_brick.health -= 1;
             if game_brick.health == 0 {
                 bricks_count.current -= 1;

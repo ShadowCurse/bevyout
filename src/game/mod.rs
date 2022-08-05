@@ -2,7 +2,6 @@ use bevy::prelude::*;
 
 pub mod ball;
 pub mod bricks;
-pub mod events;
 pub mod physics;
 pub mod platform;
 pub mod scene;
@@ -10,7 +9,6 @@ pub mod scene;
 use crate::utils::remove_all_with;
 use ball::BallPlugin;
 use bricks::BricksPlugin;
-use events::EventsPlugin;
 use physics::PhysicsPlugin;
 use platform::PlatformPlugin;
 use scene::ScenePlugin;
@@ -24,7 +22,6 @@ impl Plugin for GamePlugin {
         app.add_plugin(PhysicsPlugin { debug: false });
         app.add_plugin(BallPlugin);
         app.add_plugin(BricksPlugin);
-        app.add_plugin(EventsPlugin);
         app.add_plugin(PlatformPlugin);
         app.add_plugin(ScenePlugin);
 

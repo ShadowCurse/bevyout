@@ -1,12 +1,38 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, window::WindowMode};
 
 pub struct ConfigPlugin;
 
 impl Plugin for ConfigPlugin {
     fn build(&self, app: &mut App) {
+        app.add_startup_system(setup_settings);
         app.add_startup_system(setup_game);
         app.add_startup_system(setup_ui);
     }
+}
+
+#[derive(Debug, Clone, Copy)]
+pub struct GameSettings {
+    pub sound_volume: f32,
+    pub window_mode: WindowMode,
+}
+
+pub struct CurrentGameSettings(pub GameSettings);
+
+pub fn setup_settings(mut commands: Commands) {
+    let settings = GameSettings {
+        sound_volume: 0.1,
+        window_mode: WindowMode::Windowed,
+    };
+    let current_settings = CurrentGameSettings(settings);
+
+    commands.insert_resource(WindowDescriptor {
+        present_mode: bevy::window::PresentMode::Immediate,
+        mode: settings.window_mode,
+        ..default()
+    });
+
+    commands.insert_resource(settings);
+    commands.insert_resource(current_settings);
 }
 
 #[derive(Debug)]
@@ -23,6 +49,7 @@ pub struct GameConfig {
     pub bricks_gap_x: f32,
     pub bricks_gap_y: f32,
     pub bricks_health: u32,
+    pub bricks_sound: Handle<AudioSource>,
 
     pub platform_width: f32,
     pub platform_height: f32,
@@ -34,7 +61,7 @@ pub struct GameConfig {
     pub scene_border_color: Color,
 }
 
-pub fn setup_game(mut commands: Commands) {
+pub fn setup_game(mut commands: Commands, asset_server: Res<AssetServer>) {
     let config = GameConfig {
         ball_radius: 5.0,
         ball_speed: 100.0,
@@ -48,6 +75,7 @@ pub fn setup_game(mut commands: Commands) {
         bricks_gap_x: 5.0,
         bricks_gap_y: 5.0,
         bricks_health: 1,
+        bricks_sound: asset_server.load("audio/bling.ogg"),
 
         platform_width: 50.0,
         platform_height: 10.0,

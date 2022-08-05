@@ -1,6 +1,7 @@
 use bevy::prelude::*;
 
 use crate::config::UiConfig;
+use crate::events::SettingsEvents;
 use crate::ui::{spawn_button, UiState};
 use crate::utils::remove_all_with;
 
@@ -74,6 +75,7 @@ fn button_system(
         (&SettingsButton, &Interaction, &mut UiColor),
         (Changed<Interaction>, With<Button>),
     >,
+    mut settings_events: EventWriter<SettingsEvents>,
 ) {
     for (button, interaction, mut color) in interaction_query.iter_mut() {
         match *interaction {
@@ -83,7 +85,13 @@ fn button_system(
                     SettingsButton::Back => {
                         ui_state.pop().unwrap();
                     }
-                    _ => {}
+                    SettingsButton::Sound => {
+                        // settings_events.send(SettingsEvents::ApplySound);
+                    },
+                    SettingsButton::Display => {
+                        // settings_events.send(SettingsEvents::ApplyDisplay);
+                    },
+                    _ => {},
                 }
             }
             Interaction::Hovered => {
