@@ -4,9 +4,9 @@ pub struct ConfigPlugin;
 
 impl Plugin for ConfigPlugin {
     fn build(&self, app: &mut App) {
-        app.add_startup_system(setup_settings);
-        app.add_startup_system(setup_game);
-        app.add_startup_system(setup_ui);
+        app.add_startup_system(setup_game_settings);
+        app.add_startup_system(setup_game_config);
+        app.add_startup_system(setup_ui_config);
     }
 }
 
@@ -18,12 +18,11 @@ pub struct GameSettings {
 
 pub struct CurrentGameSettings(pub GameSettings);
 
-pub fn setup_settings(mut commands: Commands) {
+pub fn setup_game_settings(mut commands: Commands) {
     let settings = GameSettings {
         sound_volume: 0.1,
         window_mode: WindowMode::Windowed,
     };
-    let current_settings = CurrentGameSettings(settings);
 
     commands.insert_resource(WindowDescriptor {
         present_mode: bevy::window::PresentMode::Immediate,
@@ -32,7 +31,6 @@ pub fn setup_settings(mut commands: Commands) {
     });
 
     commands.insert_resource(settings);
-    commands.insert_resource(current_settings);
 }
 
 #[derive(Debug)]
@@ -61,7 +59,7 @@ pub struct GameConfig {
     pub scene_border_color: Color,
 }
 
-pub fn setup_game(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>) {
     let config = GameConfig {
         ball_radius: 5.0,
         ball_speed: 100.0,
@@ -134,7 +132,7 @@ pub struct UiConfig {
     pub cursor_radius: f32,
 }
 
-fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn setup_ui_config(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(UiConfig {
         btn_style: Style {
             size: Size::new(Val::Px(200.0), Val::Px(100.0)),

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::config::{CurrentGameSettings, GameConfig};
+use crate::config::{GameConfig, GameSettings};
 use crate::events::GameEvents;
 use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
 use crate::game::GameElement;
@@ -109,7 +109,7 @@ fn spawn_grid(
 fn bricks_collision(
     audio: Res<Audio>,
     config: Res<GameConfig>,
-    settings: Res<CurrentGameSettings>,
+    settings: Res<GameSettings>,
     mut commands: Commands,
     mut bricks_count: ResMut<BricksCount>,
     mut collision_events: EventReader<CollisionEvent>,
@@ -122,7 +122,7 @@ fn bricks_collision(
                 config.bricks_sound.clone(),
                 PlaybackSettings {
                     repeat: false,
-                    volume: settings.0.sound_volume,
+                    volume: settings.sound_volume,
                     speed: 1.0,
                 },
             );
