@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy::window::WindowMode;
 
 use crate::config::GameSettings;
 use crate::game::GameState;
@@ -10,10 +11,10 @@ pub enum GameEvents {
 }
 
 pub enum SettingsEvents {
-    ApplySound,
-    ApplyDisplay,
-    RevertSound,
-    RevertDisplay,
+    DisplayFullScreen,
+    DisplayWindowed,
+    VolumeUp,
+    VolumeDown,
 }
 
 pub struct EventsPlugin;
@@ -28,7 +29,7 @@ impl Plugin for EventsPlugin {
                 .with_system(handle_game_events)
         );
         app.add_system_set(
-            SystemSet::on_update(GameState::Paused)
+            SystemSet::on_update(UiState::Settings)
                 .with_system(handle_settings_events),
         );
     }
@@ -60,19 +61,25 @@ fn handle_game_events(
 }
 
 fn handle_settings_events(
-    settings: Res<GameSettings>,
+    mut settings: ResMut<GameSettings>,
     mut windows: ResMut<Windows>,
     mut settings_events: EventReader<SettingsEvents>,
 ) {
     for event in settings_events.iter() {
         match event {
-            SettingsEvents::ApplySound => {
+            SettingsEvents::DisplayWindowed => {
+                windows.get_primary_mut().unwrap().set_mode(WindowMode::Windowed);
             }
-            SettingsEvents::RevertSound => {
+            SettingsEvents::DisplayFullScreen => {
+                windows.get_primary_mut().unwrap().set_mode(WindowMode::Fullscreen);
             }
-            SettingsEvents::ApplyDisplay => {
+            SettingsEvents::VolumeUp => {
+                settings.sound_volume += 0.01;
+                settings.sound_volume = settings.sound_volume.clamp(0.0, 1.0);
             }
-            SettingsEvents::RevertDisplay => {
+            SettingsEvents::VolumeDown => {
+                settings.sound_volume -= 0.01;
+                settings.sound_volume = settings.sound_volume.clamp(0.0, 1.0);
             }
         }
     }

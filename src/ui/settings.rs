@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::config::UiConfig;
+use crate::config::{GameSettings, UiConfig};
 use crate::events::SettingsEvents;
 use crate::ui::{spawn_button, UiState};
 use crate::utils::remove_all_with;
@@ -10,7 +10,11 @@ pub struct SettingsPlugin;
 impl Plugin for SettingsPlugin {
     fn build(&self, app: &mut App) {
         app.add_system_set(SystemSet::on_enter(UiState::Settings).with_system(settings_setup));
-        app.add_system_set(SystemSet::on_update(UiState::Settings).with_system(button_system));
+        app.add_system_set(
+            SystemSet::on_update(UiState::Settings)
+                .with_system(button_system)
+                .with_system(volume_update),
+        );
         app.add_system_set(
             SystemSet::on_exit(UiState::Settings).with_system(remove_all_with::<UiSettingsElement>),
         );
@@ -28,6 +32,9 @@ enum SettingsButton {
     VolumeDown,
     Back,
 }
+
+#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct UiSettingsVolume;
 
 fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
     commands
@@ -133,13 +140,13 @@ fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
                                     spawn_button(
                                         builder,
                                         &config,
-                                        SettingsButton::VolumeUp,
+                                        SettingsButton::VolumeDown,
                                         UiSettingsElement,
                                     );
                                     spawn_button(
                                         builder,
                                         &config,
-                                        SettingsButton::VolumeDown,
+                                        SettingsButton::VolumeUp,
                                         UiSettingsElement,
                                     );
                                 });
@@ -152,10 +159,20 @@ fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
                                     ),
                                     ..default()
                                 })
-                                .insert(UiSettingsElement);
+                                .insert(UiSettingsElement)
+                                .insert(UiSettingsVolume);
                         });
                 });
         });
+}
+
+fn volume_update(
+    settings: Res<GameSettings>,
+    mut volume: Query<&mut Text, With<UiSettingsVolume>>,
+) {
+    let mut text = volume.single_mut();
+    let str = format!("Volume: {}%", (settings.sound_volume * 100.0) as u32);
+    text.sections[0].value = str;
 }
 
 fn button_system(
@@ -175,7 +192,18 @@ fn button_system(
                     SettingsButton::Back => {
                         ui_state.pop().unwrap();
                     }
-                    _ => {}
+                    SettingsButton::DisplayWindowed => {
+                        settings_events.send(SettingsEvents::DisplayWindowed);
+                    }
+                    SettingsButton::DisplayFullScreen => {
+                        settings_events.send(SettingsEvents::DisplayFullScreen);
+                    }
+                    SettingsButton::VolumeUp => {
+                        settings_events.send(SettingsEvents::VolumeUp);
+                    }
+                    SettingsButton::VolumeDown => {
+                        settings_events.send(SettingsEvents::VolumeDown);
+                    }
                 }
             }
             Interaction::Hovered => {
