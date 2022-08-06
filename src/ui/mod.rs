@@ -44,8 +44,8 @@ pub enum UiState {
 pub struct GameUiCamera;
 
 fn spawn_button<B, M>(
-    commands: &mut Commands,
-    parent: Entity,
+    child_builder: &mut ChildBuilder,
+    // parent: Entity,
     style: &UiConfig,
     button: B,
     marker: M,
@@ -53,7 +53,8 @@ fn spawn_button<B, M>(
     B: Component + std::fmt::Debug,
     M: Component + Copy,
 {
-    let child = commands
+    // let child = commands
+    child_builder
         .spawn_bundle(ButtonBundle {
             style: style.btn_style.clone(),
             color: style.btn_color_normal.into(),
@@ -71,5 +72,5 @@ fn spawn_button<B, M>(
         .insert(marker)
         .id();
 
-    commands.entity(parent).push_children(&[child]);
+    // commands.entity(parent).push_children(&[child]);
 }

@@ -33,36 +33,23 @@ enum MainMenuButton {
 }
 
 fn main_menu_setup(mut commands: Commands, config: Res<UiConfig>) {
-    let ui = commands
+    commands
         .spawn_bundle(NodeBundle {
             style: config.menu_style.clone(),
             color: config.menu_color.into(),
             ..default()
         })
         .insert(UiMainMenuElement)
-        .id();
-
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        MainMenuButton::Start,
-        UiMainMenuElement,
-    );
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        MainMenuButton::Settings,
-        UiMainMenuElement,
-    );
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        MainMenuButton::Exit,
-        UiMainMenuElement,
-    );
+        .with_children(|builder| {
+            spawn_button(builder, &config, MainMenuButton::Start, UiMainMenuElement);
+            spawn_button(
+                builder,
+                &config,
+                MainMenuButton::Settings,
+                UiMainMenuElement,
+            );
+            spawn_button(builder, &config, MainMenuButton::Exit, UiMainMenuElement);
+        });
 }
 
 fn button_system(

@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::config::{GameSettings, CurrentGameSettings};
+use crate::config::GameSettings;
 use crate::game::GameState;
 use crate::ui::UiState;
 
@@ -61,7 +61,6 @@ fn handle_game_events(
 
 fn handle_settings_events(
     settings: Res<GameSettings>,
-    mut current_settings: ResMut<CurrentGameSettings>,
     mut windows: ResMut<Windows>,
     mut settings_events: EventReader<SettingsEvents>,
 ) {

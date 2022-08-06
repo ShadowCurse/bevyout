@@ -27,29 +27,22 @@ enum EndGameButton {
 }
 
 fn end_game_setup(mut commands: Commands, config: Res<UiConfig>) {
-    let ui = commands
+    commands
         .spawn_bundle(NodeBundle {
             style: config.menu_style.clone(),
             color: config.menu_color.into(),
             ..default()
         })
         .insert(UiEndGameElement)
-        .id();
-
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        EndGameButton::Retry,
-        UiEndGameElement,
-    );
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        EndGameButton::BackToMainMenu,
-        UiEndGameElement,
-    );
+        .with_children(|builder| {
+            spawn_button(builder, &config, EndGameButton::Retry, UiEndGameElement);
+            spawn_button(
+                builder,
+                &config,
+                EndGameButton::BackToMainMenu,
+                UiEndGameElement,
+            );
+        });
 }
 
 fn button_system(

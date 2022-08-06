@@ -16,8 +16,6 @@ pub struct GameSettings {
     pub window_mode: WindowMode,
 }
 
-pub struct CurrentGameSettings(pub GameSettings);
-
 pub fn setup_game_settings(mut commands: Commands) {
     let settings = GameSettings {
         sound_volume: 0.1,
@@ -136,11 +134,8 @@ fn setup_ui_config(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(UiConfig {
         btn_style: Style {
             size: Size::new(Val::Px(200.0), Val::Px(100.0)),
-            // center button
-            margin: UiRect::all(Val::Auto),
-            // horizontally center child text
+            margin: UiRect::all(Val::Percent(1.0)),
             justify_content: JustifyContent::Center,
-            // vertically center child text
             align_items: AlignItems::Center,
             ..default()
         },
@@ -148,16 +143,12 @@ fn setup_ui_config(mut commands: Commands, asset_server: Res<AssetServer>) {
         btn_color_hover: Color::rgb(0.25, 0.25, 0.25),
         btn_color_pressed: Color::rgb(0.35, 0.75, 0.35),
         menu_style: Style {
-            size: Size::new(Val::Px(500.0), Val::Px(300.0)),
-            // center button
             margin: UiRect::all(Val::Auto),
-            // horizontally center child text
             justify_content: JustifyContent::Center,
-            // vertically center child text
-            align_items: AlignItems::Stretch,
+            align_items: AlignItems::Center,
             ..default()
         },
-        menu_color: Color::GRAY,
+        menu_color: Color::NONE,
         text_style: TextStyle {
             font: asset_server.load("fonts/monaco.ttf"),
             font_size: 20.0,

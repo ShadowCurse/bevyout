@@ -32,36 +32,23 @@ enum PausedButton {
 }
 
 fn paused_setup(mut commands: Commands, config: Res<UiConfig>) {
-    let ui = commands
+    commands
         .spawn_bundle(NodeBundle {
             style: config.menu_style.clone(),
             color: config.menu_color.into(),
             ..default()
         })
         .insert(UiPausedElement)
-        .id();
-
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        PausedButton::Resume,
-        UiPausedElement,
-    );
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        PausedButton::Settings,
-        UiPausedElement,
-    );
-    spawn_button(
-        &mut commands,
-        ui,
-        &config,
-        PausedButton::BackToMainMenu,
-        UiPausedElement,
-    );
+        .with_children(|builder| {
+            spawn_button(builder, &config, PausedButton::Resume, UiPausedElement);
+            spawn_button(builder, &config, PausedButton::Settings, UiPausedElement);
+            spawn_button(
+                builder,
+                &config,
+                PausedButton::BackToMainMenu,
+                UiPausedElement,
+            );
+        });
 }
 
 fn button_system(
