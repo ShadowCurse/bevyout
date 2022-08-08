@@ -45,7 +45,6 @@ pub struct GameUiCamera;
 
 fn spawn_button<B, M>(
     child_builder: &mut ChildBuilder,
-    // parent: Entity,
     style: &UiConfig,
     button: B,
     marker: M,
@@ -53,7 +52,6 @@ fn spawn_button<B, M>(
     B: Component + std::fmt::Debug,
     M: Component + Copy,
 {
-    // let child = commands
     child_builder
         .spawn_bundle(ButtonBundle {
             style: style.btn_style.clone(),
@@ -69,8 +67,5 @@ fn spawn_button<B, M>(
                 .insert(marker);
         })
         .insert(button)
-        .insert(marker)
-        .id();
-
-    // commands.entity(parent).push_children(&[child]);
+        .insert(marker);
 }

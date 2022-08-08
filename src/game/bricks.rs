@@ -28,12 +28,19 @@ pub struct BricksCount {
     pub current: u32,
 }
 
+pub struct Score {
+    pub score: u32,
+}
+
 fn bricks_spawn(
     config: Res<GameConfig>,
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    commands.insert_resource(Score {
+        score: 0,
+    });
     let total_bricks = config.bricks_cols * config.bricks_rows;
     commands.insert_resource(BricksCount {
         total: total_bricks,
@@ -112,6 +119,7 @@ fn bricks_collision(
     settings: Res<GameSettings>,
     mut commands: Commands,
     mut bricks_count: ResMut<BricksCount>,
+    mut score: ResMut<Score>,
     mut collision_events: EventReader<CollisionEvent>,
     mut bricks: Query<(Entity, &mut GameBrick)>,
     mut game_events: EventWriter<GameEvents>,
@@ -127,6 +135,7 @@ fn bricks_collision(
                 },
             );
             game_brick.health -= 1;
+            score.score += 1;
             if game_brick.health == 0 {
                 bricks_count.current -= 1;
                 commands.entity(brick).despawn();
