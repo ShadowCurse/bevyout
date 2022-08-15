@@ -51,8 +51,22 @@ fn ball_spawn(
                 radius: config.ball_radius,
                 subdivisions: 10,
             })),
-            material: materials.add(Color::TEAL.into()),
+            material: materials.add(StandardMaterial {
+                base_color: Color::RED,
+                emissive: Color::RED,
+                ..default()
+            }),
             transform: Transform::from_xyz(100.0, 50.0, 0.0),
+            ..default()
+        })
+        .insert_bundle(PointLightBundle {
+            point_light: PointLight {
+                color: Color::RED,
+                intensity: 1000.0,
+                range: 1000.0,
+                radius: 1000.0,
+                ..default()
+            },
             ..default()
         })
         .insert(GameElement)
@@ -69,6 +83,7 @@ fn ball_spawn(
 }
 
 fn ball_movement(
+    config: Res<GameConfig>,
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
     cursor: Res<WorldCursor>,
@@ -83,9 +98,11 @@ fn ball_movement(
                     ball.velocity.x = cursor.0.x - transform.translation.x;
                     ball.velocity.y = cursor.0.y - transform.translation.y;
                     ball.velocity = ball.velocity.normalize();
+                    ball.speed = config.ball_speed;
                 } else if let Ok((platform_transform, platform)) = platform.get_single() {
                     transform.translation.x = platform_transform.translation.x;
-                    transform.translation.y = platform_transform.translation.y + platform.height * 0.5 + ball.radius;
+                    transform.translation.y =
+                        platform_transform.translation.y + platform.height * 0.5 + ball.radius;
                 }
             }
             GameBallState::Detached => {
@@ -119,6 +136,7 @@ fn ball_collision(
 
             let new_vel = -2.0 * game_ball.velocity.dot(normal) * normal + game_ball.velocity;
             game_ball.velocity = new_vel.normalize();
+            game_ball.speed = 120.0_f32.max(game_ball.speed + 5.0);
         }
     }
 }

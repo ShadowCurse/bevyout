@@ -106,14 +106,17 @@ pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>)
         ..default()
     });
 
+    // turn off ambient light
+    commands.insert_resource(AmbientLight { color: Color::NONE, brightness: 0.0 });
+
     // light
-    commands.spawn_bundle(DirectionalLightBundle {
-        directional_light: DirectionalLight {
-            illuminance: 10000.0,
-            ..default()
-        },
-        ..default()
-    });
+    // commands.spawn_bundle(DirectionalLightBundle {
+    //     directional_light: DirectionalLight {
+    //         illuminance: 10000.0,
+    //         ..default()
+    //     },
+    //     ..default()
+    // });
 }
 
 #[derive(Debug)]
