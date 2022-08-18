@@ -16,6 +16,7 @@ impl Plugin for CursorPlugin {
     }
 }
 
+#[derive(Debug, Clone, Resource)]
 pub struct WorldCursor(pub Vec3);
 
 #[derive(Component)]

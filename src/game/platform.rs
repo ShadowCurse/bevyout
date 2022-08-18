@@ -33,6 +33,7 @@ pub struct GamePlatform {
     pub speed: f32,
 }
 
+#[derive(Debug, Clone, Resource)]
 pub struct PlatformLifes {
     pub max: u32,
     pub current: u32,

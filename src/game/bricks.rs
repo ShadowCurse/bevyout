@@ -18,16 +18,18 @@ impl Plugin for BricksPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Debug, Clone, Component)]
 pub struct GameBrick {
     health: u32,
 }
 
+#[derive(Debug, Clone, Resource)]
 pub struct BricksCount {
     pub total: u32,
     pub current: u32,
 }
 
+#[derive(Debug, Clone, Resource)]
 pub struct Score {
     pub score: u32,
 }
