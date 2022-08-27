@@ -6,7 +6,7 @@ use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
 use crate::game::GameElement;
 use crate::game::GameState;
 
-use super::ball::{GameBall, GameBallState};
+use super::ball::{GameBall, GameBallEvent};
 
 pub struct PlatformPlugin;
 
@@ -15,9 +15,11 @@ impl Plugin for PlatformPlugin {
         app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(platform_spawn));
         app.add_system_set_to_stage(
             PhysicsStage::Movement,
-            SystemSet::on_update(GameState::InGame)
-                .with_system(platform_movement)
-                .with_system(platform_lifes),
+            SystemSet::on_update(GameState::InGame).with_system(platform_movement),
+        );
+        app.add_system_set_to_stage(
+            PhysicsStage::CollisionDetection,
+            SystemSet::on_update(GameState::InGame).with_system(platform_lifes),
         );
         app.add_system_set_to_stage(
             PhysicsStage::CollisionResolution,
@@ -50,6 +52,11 @@ fn platform_spawn(
         current: config.platform_lifes,
     });
 
+    let material = materials.add(StandardMaterial {
+        emissive: config.platform_color,
+        ..default()
+    });
+
     commands
         .spawn_bundle(PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Box::new(
@@ -57,7 +64,7 @@ fn platform_spawn(
                 config.platform_height,
                 1.0,
             ))),
-            material: materials.add(Color::FUCHSIA.into()),
+            material,
             transform: Transform::from_xyz(config.scene_width as f32 / 2.0, 10.0, 0.0),
             ..default()
         })
@@ -92,22 +99,19 @@ fn platform_movement(
 
 fn platform_lifes(
     platform: Query<&Transform, With<GamePlatform>>,
-    mut balls: Query<(&Transform, &mut GameBall), Without<GamePlatform>>,
+    ball: Query<&Transform, (With<GameBall>, Without<GamePlatform>)>,
     mut lifes: ResMut<PlatformLifes>,
     mut game_events: EventWriter<GameEvents>,
+    mut ball_events: EventWriter<GameBallEvent>,
 ) {
-    // if more than 1 ball
-    if 1 < balls.iter().size_hint().0 {
-        return;
-    }
-    let (ball, mut game_ball) = balls.get_single_mut().unwrap();
-    let platform = platform.get_single().unwrap();
-    if ball.translation.y < platform.translation.y {
-        lifes.current -= 1;
-        game_ball.state = GameBallState::Attached;
-    }
-    if lifes.current == 0 {
-        game_events.send(GameEvents::EndGame);
+    if let (Ok(ball), Ok(platform)) = (ball.get_single(), platform.get_single()) {
+        if ball.translation.y < platform.translation.y {
+            lifes.current -= 1;
+            ball_events.send(GameBallEvent::ChangeState);
+        }
+        if lifes.current == 0 {
+            game_events.send(GameEvents::EndGame);
+        }
     }
 }
 
