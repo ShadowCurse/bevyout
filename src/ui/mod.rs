@@ -43,12 +43,8 @@ pub enum UiState {
 #[derive(Component, Debug, Clone)]
 pub struct GameUiCamera;
 
-fn spawn_button<B, M>(
-    child_builder: &mut ChildBuilder,
-    style: &UiConfig,
-    button: B,
-    marker: M,
-) where
+fn spawn_button<B, M>(child_builder: &mut ChildBuilder, style: &UiConfig, button: B, marker: M)
+where
     B: Component + std::fmt::Debug,
     M: Component + Copy,
 {

@@ -26,11 +26,10 @@ impl Plugin for EventsPlugin {
         app.add_system_set(
             SystemSet::on_update(GameState::InGame)
                 .with_system(keyboard_input)
-                .with_system(handle_game_events)
+                .with_system(handle_game_events),
         );
         app.add_system_set(
-            SystemSet::on_update(UiState::Settings)
-                .with_system(handle_settings_events),
+            SystemSet::on_update(UiState::Settings).with_system(handle_settings_events),
         );
     }
 }
@@ -68,10 +67,16 @@ fn handle_settings_events(
     for event in settings_events.iter() {
         match event {
             SettingsEvents::DisplayWindowed => {
-                windows.get_primary_mut().unwrap().set_mode(WindowMode::Windowed);
+                windows
+                    .get_primary_mut()
+                    .unwrap()
+                    .set_mode(WindowMode::Windowed);
             }
             SettingsEvents::DisplayFullScreen => {
-                windows.get_primary_mut().unwrap().set_mode(WindowMode::Fullscreen);
+                windows
+                    .get_primary_mut()
+                    .unwrap()
+                    .set_mode(WindowMode::Fullscreen);
             }
             SettingsEvents::VolumeUp => {
                 settings.sound_volume += 0.01;

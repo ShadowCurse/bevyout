@@ -1,55 +1,16 @@
 use bevy::prelude::*;
 
-use crate::config::UiConfig;
-use crate::ui::UiState;
-
 pub struct CursorPlugin;
 
 impl Plugin for CursorPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(WorldCursor(Vec3::ZERO));
         app.add_system(world_cursor_system);
-
-        app.add_system_set(SystemSet::on_enter(UiState::InGame).with_system(cursor_spawn));
-        app.add_system_set(SystemSet::on_update(UiState::InGame).with_system(cursor_move));
-        app.add_system_set(SystemSet::on_exit(UiState::InGame).with_system(cursor_remove));
     }
 }
 
 #[derive(Debug, Clone, Resource)]
 pub struct WorldCursor(pub Vec3);
-
-#[derive(Component)]
-pub struct GameCursor;
-
-fn cursor_spawn(
-    config: Res<UiConfig>,
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
-    commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Icosphere {
-                radius: config.cursor_radius,
-                subdivisions: 10,
-            })),
-            material: materials.add(config.cursor_color.into()),
-            ..default()
-        })
-        .insert(GameCursor);
-}
-
-fn cursor_move(
-    world_cursor: ResMut<WorldCursor>,
-    mut cursor: Query<&mut Transform, With<GameCursor>>,
-) {
-    cursor.get_single_mut().unwrap().translation = world_cursor.0;
-}
-
-fn cursor_remove(mut commands: Commands, cursor: Query<Entity, With<GameCursor>>) {
-    commands.entity(cursor.get_single().unwrap()).despawn();
-}
 
 fn world_cursor_system(
     mut crs: ResMut<WorldCursor>,
