@@ -35,6 +35,9 @@ pub fn setup_game_settings(mut commands: Commands) {
 pub struct GameConfig {
     pub ball_radius: f32,
     pub ball_speed: f32,
+    pub ball_max_speed_multiplier: f32,
+    pub ball_base_color: Color,
+    pub ball_max_speed_color: Color,
 
     pub bricks_pos_x: f32,
     pub bricks_pos_y: f32,
@@ -46,11 +49,13 @@ pub struct GameConfig {
     pub bricks_gap_y: f32,
     pub bricks_health: u32,
     pub bricks_sound: Handle<AudioSource>,
+    pub bricks_color: Color,
 
     pub platform_width: f32,
     pub platform_height: f32,
     pub platform_speed: f32,
     pub platform_lifes: u32,
+    pub platform_color: Color,
 
     pub scene_width: f32,
     pub scene_height: f32,
@@ -61,6 +66,9 @@ pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>)
     let config = GameConfig {
         ball_radius: 5.0,
         ball_speed: 100.0,
+        ball_max_speed_multiplier: 2.5,
+        ball_base_color: Color::hex("007f5f").unwrap(),
+        ball_max_speed_color: Color::hex("dddf00").unwrap(),
 
         bricks_pos_x: 100.0,
         bricks_pos_y: 200.0,
@@ -72,15 +80,17 @@ pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>)
         bricks_gap_y: 5.0,
         bricks_health: 1,
         bricks_sound: asset_server.load("audio/bling.ogg"),
+        bricks_color: Color::hex("e85d04").unwrap(),
 
         platform_width: 50.0,
         platform_height: 10.0,
         platform_speed: 100.0,
         platform_lifes: 5,
+        platform_color: Color::hex("6a040f").unwrap(),
 
         scene_width: 200.0,
         scene_height: 350.0,
-        scene_border_color: Color::WHITE,
+        scene_border_color: Color::hex("faa307").unwrap(),
     };
 
     // camera
@@ -107,16 +117,19 @@ pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>)
     });
 
     // turn off ambient light
-    commands.insert_resource(AmbientLight { color: Color::NONE, brightness: 0.0 });
+    commands.insert_resource(AmbientLight {
+        color: Color::WHITE,
+        brightness: 0.0,
+    });
 
     // light
-    // commands.spawn_bundle(DirectionalLightBundle {
-    //     directional_light: DirectionalLight {
-    //         illuminance: 10000.0,
-    //         ..default()
-    //     },
-    //     ..default()
-    // });
+    commands.spawn_bundle(DirectionalLightBundle {
+        directional_light: DirectionalLight {
+            illuminance: 300.0,
+            ..default()
+        },
+        ..default()
+    });
 }
 
 #[derive(Debug, Clone, Resource)]
@@ -155,7 +168,7 @@ fn setup_ui_config(mut commands: Commands, asset_server: Res<AssetServer>) {
         text_style: TextStyle {
             font: asset_server.load("fonts/monaco.ttf"),
             font_size: 20.0,
-            color: Color::ORANGE,
+            color: Color::hex("faa307").unwrap(),
         },
 
         cursor_color: Color::GREEN,

@@ -40,9 +40,7 @@ fn bricks_spawn(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    commands.insert_resource(Score {
-        score: 0,
-    });
+    commands.insert_resource(Score { score: 0 });
     let total_bricks = config.bricks_cols * config.bricks_rows;
     commands.insert_resource(BricksCount {
         total: total_bricks,
@@ -55,7 +53,10 @@ fn bricks_spawn(
         1.0,
     )));
 
-    let brick_material = materials.add(Color::INDIGO.into());
+    let brick_material = materials.add(StandardMaterial {
+        emissive: config.bricks_color,
+        ..default()
+    });
 
     for pos in spawn_grid(
         Vec2::new(config.bricks_pos_x, config.bricks_pos_y),

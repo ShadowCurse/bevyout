@@ -22,7 +22,10 @@ fn scene_spawn(
     let top_bot_mesh = meshes.add(Mesh::from(shape::Box::new(config.scene_width, 1.0, 1.0)));
     let left_right_mesh = meshes.add(Mesh::from(shape::Box::new(1.0, config.scene_height, 1.0)));
 
-    let border_material = materials.add(config.scene_border_color.into());
+    let border_material = materials.add(StandardMaterial {
+        emissive: config.scene_border_color,
+        ..default()
+    });
 
     // top
     commands
