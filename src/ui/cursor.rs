@@ -9,7 +9,7 @@ impl Plugin for CursorPlugin {
     }
 }
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Clone)]
 pub struct WorldCursor(pub Vec3);
 
 fn world_cursor_system(

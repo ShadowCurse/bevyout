@@ -23,13 +23,13 @@ pub struct GameBrick {
     health: u32,
 }
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Clone)]
 pub struct BricksCount {
     pub total: u32,
     pub current: u32,
 }
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Clone)]
 pub struct Score {
     pub score: u32,
 }

@@ -10,7 +10,7 @@ impl Plugin for ConfigPlugin {
     }
 }
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Clone)]
 pub struct GameSettings {
     pub sound_volume: f32,
     pub window_mode: WindowMode,
@@ -31,7 +31,7 @@ pub fn setup_game_settings(mut commands: Commands) {
     commands.insert_resource(settings);
 }
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Clone)]
 pub struct GameConfig {
     pub ball_radius: f32,
     pub ball_speed: f32,
@@ -132,7 +132,7 @@ pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>)
     });
 }
 
-#[derive(Debug, Clone, Resource)]
+#[derive(Debug, Clone)]
 pub struct UiConfig {
     pub btn_style: Style,
     pub btn_color_normal: Color,
