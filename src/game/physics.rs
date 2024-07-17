@@ -1,8 +1,8 @@
 use crate::game::GameState;
 use bevy::prelude::*;
 
-#[derive(StageLabel, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub enum PhysicsStage {
+#[derive(SystemSet, Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum PhysicsSet {
     Movement,
     CollisionDetection,
     CollisionResolution,
@@ -16,29 +16,17 @@ impl Plugin for PhysicsPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<CollisionEvent>();
 
-        app.add_stage(PhysicsStage::Movement, SystemStage::parallel());
-        app.add_stage_after(
-            PhysicsStage::Movement,
-            PhysicsStage::CollisionDetection,
-            SystemStage::parallel(),
-        );
-        app.add_stage_after(
-            PhysicsStage::CollisionDetection,
-            PhysicsStage::CollisionResolution,
-            SystemStage::parallel(),
-        );
-
-        app.add_state_to_stage(PhysicsStage::Movement, GameState::NotInGame);
-        app.add_state_to_stage(PhysicsStage::CollisionDetection, GameState::NotInGame);
-        app.add_state_to_stage(PhysicsStage::CollisionResolution, GameState::NotInGame);
-        app.add_system_set_to_stage(
-            PhysicsStage::CollisionDetection,
-            SystemSet::on_update(GameState::InGame)
-                .with_system(ball_rect_collision_system)
-                .with_system(rect_rect_collision_system),
+        app.add_systems(
+            Update,
+            (ball_rect_collision_system, rect_rect_collision_system)
+                .in_set(PhysicsSet::CollisionDetection)
+                .run_if(in_state(GameState::InGame)),
         );
         if self.debug {
-            app.add_system_to_stage(PhysicsStage::CollisionResolution, debug_physics_event);
+            app.add_systems(
+                Update,
+                debug_physics_event.in_set(PhysicsSet::CollisionResolution),
+            );
         }
     }
 }
@@ -57,7 +45,7 @@ pub struct Rectangle {
 #[derive(Component, Debug)]
 pub struct Dynamic;
 
-#[derive(Debug)]
+#[derive(Event, Debug)]
 pub struct CollisionEvent {
     pub entity1: Entity,
     pub entity2: Entity,
@@ -164,11 +152,11 @@ fn debug_physics_event(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    for event in collision_events.iter() {
+    for event in collision_events.read() {
         debug!("collision event: {:?}", event);
-        commands.spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube { size: 1.0 })),
-            material: materials.add(Color::RED.into()),
+        commands.spawn(PbrBundle {
+            mesh: meshes.add(Mesh::from(Cuboid::new(1.0, 1.0, 1.0))),
+            material: materials.add(Color::srgb(1.0, 0.0, 0.0)),
             transform: Transform::from_xyz(event.collision_point.x, event.collision_point.y, 2.0),
             ..default()
         });

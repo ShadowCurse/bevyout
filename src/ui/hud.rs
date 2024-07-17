@@ -4,26 +4,15 @@ use crate::config::UiConfig;
 use crate::game::bricks::Score;
 use crate::game::platform::PlatformLifes;
 use crate::ui::UiState;
-use crate::utils::remove_all_with;
 
 pub struct HudPlugin;
 
 impl Plugin for HudPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(UiState::InGame).with_system(hud_setup));
-        app.add_system_set(SystemSet::on_update(UiState::InGame).with_system(hud_update));
-        app.add_system_set(
-            SystemSet::on_pause(UiState::InGame).with_system(remove_all_with::<UiHudElement>),
-        );
-        app.add_system_set(SystemSet::on_resume(UiState::InGame).with_system(hud_setup));
-        app.add_system_set(
-            SystemSet::on_exit(UiState::InGame).with_system(remove_all_with::<UiHudElement>),
-        );
+        app.add_systems(OnEnter(UiState::InGame), hud_setup);
+        app.add_systems(Update, hud_update.run_if(in_state(UiState::InGame)));
     }
 }
-
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct UiHudElement;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct UiLifesCount;
@@ -33,7 +22,7 @@ struct UiScore;
 
 fn hud_setup(mut command: Commands, config: Res<UiConfig>) {
     command
-        .spawn_bundle(NodeBundle {
+        .spawn(NodeBundle {
             style: Style {
                 align_self: AlignSelf::Auto,
                 flex_direction: FlexDirection::Column,
@@ -41,36 +30,34 @@ fn hud_setup(mut command: Commands, config: Res<UiConfig>) {
                 justify_content: JustifyContent::FlexEnd,
                 ..default()
             },
-            color: Color::NONE.into(),
+            background_color: Color::NONE.into(),
             ..default()
         })
-        .insert(UiHudElement)
+        .insert(StateScoped(UiState::MainMenu))
         .with_children(|builder| {
             // lifes count
             builder
-                .spawn_bundle(TextBundle {
-                    text: Text::from_section("Lifes: ---", config.text_style.clone())
-                        .with_alignment(TextAlignment {
-                            vertical: VerticalAlign::Center,
-                            horizontal: HorizontalAlign::Left,
-                        }),
+                .spawn(TextBundle {
+                    text: Text::from_section("Lifes: ---", config.text_style.clone()),
+                    // .with_alignment(TextAlignment {
+                    //     vertical: VerticalAlign::Center,
+                    //     horizontal: HorizontalAlign::Left,
+                    // }),
                     ..default()
                 })
-                .insert(UiLifesCount)
-                .insert(UiHudElement);
+                .insert(UiLifesCount);
 
             // score
             builder
-                .spawn_bundle(TextBundle {
-                    text: Text::from_section("Score: ---", config.text_style.clone())
-                        .with_alignment(TextAlignment {
-                            vertical: VerticalAlign::Center,
-                            horizontal: HorizontalAlign::Left,
-                        }),
+                .spawn(TextBundle {
+                    text: Text::from_section("Score: ---", config.text_style.clone()),
+                    // .with_alignment(TextAlignment {
+                    //     vertical: VerticalAlign::Center,
+                    //     horizontal: HorizontalAlign::Left,
+                    // }),
                     ..default()
                 })
-                .insert(UiScore)
-                .insert(UiHudElement);
+                .insert(UiScore);
         });
 }
 

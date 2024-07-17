@@ -19,20 +19,24 @@ pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_state(UiState::MainMenu);
+        app.init_state::<UiState>();
+        app.enable_state_scoped_entities::<UiState>();
 
-        app.add_plugin(CursorPlugin);
-        app.add_plugin(EndGamePlugin);
-        app.add_plugin(HudPlugin);
-        app.add_plugin(MainMenuPlugin);
-        app.add_plugin(PausedPlugin);
-        app.add_plugin(SettingsPlugin);
+        app.add_plugins((
+            CursorPlugin,
+            EndGamePlugin,
+            HudPlugin,
+            MainMenuPlugin,
+            PausedPlugin,
+            SettingsPlugin,
+        ));
     }
 }
 
 /// Ui states
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, States)]
 pub enum UiState {
+    #[default]
     MainMenu,
     InGame,
     Paused,
@@ -40,28 +44,21 @@ pub enum UiState {
     EndGame,
 }
 
-#[derive(Component, Debug, Clone)]
-pub struct GameUiCamera;
-
-fn spawn_button<B, M>(child_builder: &mut ChildBuilder, style: &UiConfig, button: B, marker: M)
+fn spawn_button<B>(child_builder: &mut ChildBuilder, style: &UiConfig, button: B)
 where
     B: Component + std::fmt::Debug,
-    M: Component + Copy,
 {
     child_builder
-        .spawn_bundle(ButtonBundle {
+        .spawn(ButtonBundle {
             style: style.btn_style.clone(),
-            color: style.btn_color_normal.into(),
+            background_color: style.btn_color_normal.into(),
             ..default()
         })
         .with_children(|parent| {
-            parent
-                .spawn_bundle(TextBundle {
-                    text: Text::from_section(format!("{:?}", button), style.text_style.clone()),
-                    ..default()
-                })
-                .insert(marker);
+            parent.spawn(TextBundle {
+                text: Text::from_section(format!("{:?}", button), style.text_style.clone()),
+                ..default()
+            });
         })
-        .insert(button)
-        .insert(marker);
+        .insert(button);
 }

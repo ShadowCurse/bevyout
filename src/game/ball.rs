@@ -1,8 +1,7 @@
 use bevy::prelude::*;
 
 use crate::config::GameConfig;
-use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsStage};
-use crate::game::GameElement;
+use crate::game::physics::{Ball, CollisionEvent, Dynamic, PhysicsSet};
 use crate::game::GameState;
 
 use crate::game::platform::GamePlatform;
@@ -13,24 +12,29 @@ pub struct BallPlugin;
 impl Plugin for BallPlugin {
     fn build(&self, app: &mut App) {
         app.add_event::<GameBallEvent>();
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(ball_spawn));
-        app.add_system_set(
-            SystemSet::on_update(GameState::InGame)
-                .with_system(ball_controlls)
-                .with_system(ball_event_handler),
+        app.add_systems(OnEnter(GameState::InGame), ball_spawn);
+        app.add_systems(
+            Update,
+            (ball_controlls, ball_event_handler).run_if(in_state(GameState::InGame)),
         );
-        app.add_system_set_to_stage(
-            PhysicsStage::Movement,
-            SystemSet::on_update(GameState::InGame).with_system(ball_movement),
+        app.add_systems(
+            Update,
+            ball_movement
+                .in_set(PhysicsSet::Movement)
+                .run_if(in_state(GameState::InGame)),
         );
-        app.add_system_set_to_stage(
-            PhysicsStage::CollisionResolution,
-            SystemSet::on_update(GameState::InGame).with_system(ball_collision),
+        app.add_systems(
+            Update,
+            ball_collision
+                .in_set(PhysicsSet::CollisionResolution)
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }
 
+#[derive(Event, Debug, Default)]
 pub enum GameBallEvent {
+    #[default]
     ChangeState,
 }
 
@@ -58,20 +62,19 @@ fn ball_spawn(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let material = materials.add(StandardMaterial {
-        emissive: config.ball_base_color,
+        emissive: config.ball_base_color.into(),
         ..default()
     });
     commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Icosphere {
+        .spawn(PbrBundle {
+            mesh: meshes.add(Mesh::from(Sphere {
                 radius: config.ball_radius,
-                subdivisions: 10,
             })),
             material: material.clone(),
             transform: Transform::from_xyz(100.0, 50.0, 0.0),
             ..default()
         })
-        .insert_bundle(PointLightBundle {
+        .insert(PointLightBundle {
             point_light: PointLight {
                 color: config.ball_base_color,
                 intensity: 1000.0,
@@ -81,7 +84,7 @@ fn ball_spawn(
             },
             ..default()
         })
-        .insert(GameElement)
+        .insert(StateScoped(GameState::InGame))
         .insert(Ball {
             radius: config.ball_radius,
         })
@@ -96,7 +99,7 @@ fn ball_spawn(
         });
 }
 
-fn ball_controlls(keys: Res<Input<KeyCode>>, mut ball_events: EventWriter<GameBallEvent>) {
+fn ball_controlls(keys: Res<ButtonInput<KeyCode>>, mut ball_events: EventWriter<GameBallEvent>) {
     if keys.just_pressed(KeyCode::Space) {
         ball_events.send(GameBallEvent::ChangeState);
     }
@@ -144,7 +147,7 @@ fn ball_collision(
     if let Ok((ball_entity, ball, mut game_ball, mut point_light, mut transform)) =
         ball.get_single_mut()
     {
-        for event in collision_events.iter() {
+        for event in collision_events.read() {
             if ball_entity == event.entity1 {
                 let offset = Vec2::new(
                     transform.translation.x - event.collision_point.x,
@@ -163,23 +166,14 @@ fn ball_collision(
                     (game_ball.speed_mul + 0.1).min(config.ball_max_speed_multiplier);
 
                 let mix = (game_ball.speed_mul - 1.0) / (config.ball_max_speed_multiplier - 1.0);
-                let new_color =
-                    ball_color_mix(config.ball_base_color, config.ball_max_speed_color, mix);
-                let mut material = materials.get_mut(&game_ball.material).unwrap();
-                material.emissive = new_color;
+                let new_color = config
+                    .ball_base_color
+                    .mix(&config.ball_max_speed_color, mix);
+                let material = materials.get_mut(&game_ball.material).unwrap();
+                material.emissive = new_color.into();
                 point_light.color = new_color;
             }
         }
-    }
-}
-
-fn ball_color_mix(base: Color, target: Color, mix: f32) -> Color {
-    assert!((0.0..=1.0).contains(&mix), "mix: {mix}");
-    Color::Rgba {
-        red: base.r() + (target.r() - base.r()) * mix,
-        green: base.g() + (target.g() - base.g()) * mix,
-        blue: base.b() + (target.b() - base.b()) * mix,
-        alpha: base.a() + (target.a() - base.a()) * mix,
     }
 }
 
@@ -191,7 +185,7 @@ fn ball_event_handler(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     if let Ok((transform, mut ball, mut point_light)) = ball.get_single_mut() {
-        for _event in ball_events.iter() {
+        for _event in ball_events.read() {
             match ball.state {
                 GameBallState::Attached => {
                     ball.state = GameBallState::Detached;
@@ -205,8 +199,8 @@ fn ball_event_handler(
                     ball.velocity = Vec2::ZERO;
                     ball.speed_mul = 1.0;
 
-                    let mut material = materials.get_mut(&ball.material).unwrap();
-                    material.emissive = config.ball_base_color;
+                    let material = materials.get_mut(&ball.material).unwrap();
+                    material.emissive = config.ball_base_color.into();
                     point_light.color = config.ball_base_color;
                 }
             }

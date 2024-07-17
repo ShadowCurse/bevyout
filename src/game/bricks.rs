@@ -1,35 +1,37 @@
+use bevy::audio::{PlaybackMode, Volume};
 use bevy::prelude::*;
 
 use crate::config::{GameConfig, GameSettings};
 use crate::events::GameEvents;
-use crate::game::physics::{CollisionEvent, PhysicsStage, Rectangle};
-use crate::game::GameElement;
+use crate::game::physics::{CollisionEvent, PhysicsSet, Rectangle};
 use crate::game::GameState;
 
 pub struct BricksPlugin;
 
 impl Plugin for BricksPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(bricks_spawn));
-        app.add_system_set_to_stage(
-            PhysicsStage::CollisionResolution,
-            SystemSet::on_update(GameState::InGame).with_system(bricks_collision),
+        app.add_systems(OnEnter(GameState::InGame), bricks_spawn);
+        app.add_systems(
+            Update,
+            bricks_collision
+                .in_set(PhysicsSet::CollisionResolution)
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }
 
-#[derive(Debug, Clone, Component)]
+#[derive(Component, Debug, Clone)]
 pub struct GameBrick {
     health: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Resource, Debug, Clone)]
 pub struct BricksCount {
     pub total: u32,
     pub current: u32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Resource, Debug, Clone)]
 pub struct Score {
     pub score: u32,
 }
@@ -47,14 +49,14 @@ fn bricks_spawn(
         current: total_bricks,
     });
 
-    let brick_mesh = meshes.add(Mesh::from(shape::Box::new(
+    let brick_mesh = meshes.add(Mesh::from(Cuboid::new(
         config.bricks_width,
         config.bricks_height,
         1.0,
     )));
 
     let brick_material = materials.add(StandardMaterial {
-        emissive: config.bricks_color,
+        emissive: config.bricks_color.into(),
         ..default()
     });
 
@@ -68,13 +70,13 @@ fn bricks_spawn(
         config.bricks_gap_y,
     ) {
         commands
-            .spawn_bundle(PbrBundle {
+            .spawn(PbrBundle {
                 mesh: brick_mesh.clone(),
                 material: brick_material.clone(),
                 transform: Transform::from_translation(pos),
                 ..default()
             })
-            .insert(GameElement)
+            .insert(StateScoped(GameState::InGame))
             .insert(Rectangle {
                 width: config.bricks_width,
                 height: config.bricks_height,
@@ -117,26 +119,28 @@ fn spawn_grid(
 }
 
 fn bricks_collision(
-    audio: Res<Audio>,
     config: Res<GameConfig>,
     settings: Res<GameSettings>,
     mut commands: Commands,
     mut bricks_count: ResMut<BricksCount>,
     mut score: ResMut<Score>,
     mut collision_events: EventReader<CollisionEvent>,
-    mut bricks: Query<(Entity, &mut GameBrick)>,
     mut game_events: EventWriter<GameEvents>,
+    mut bricks: Query<(Entity, &mut GameBrick)>,
+    mut audio: Query<(&mut Handle<AudioSource>, &mut PlaybackSettings)>,
 ) {
-    for event in collision_events.iter() {
+    let Ok((mut audio_source, mut audio_settings)) = audio.get_single_mut() else {
+        return;
+    };
+    for event in collision_events.read() {
         if let Ok((brick, mut game_brick)) = bricks.get_mut(event.entity2) {
-            audio.play_with_settings(
-                config.bricks_sound.clone(),
-                PlaybackSettings {
-                    repeat: false,
-                    volume: settings.sound_volume,
-                    speed: 1.0,
-                },
-            );
+            *audio_source = config.bricks_sound.clone();
+            *audio_settings = PlaybackSettings {
+                mode: PlaybackMode::Once,
+                volume: Volume::new(settings.sound_volume),
+                speed: 1.0,
+                ..Default::default()
+            };
             game_brick.health -= 1;
             score.score += 1;
             if game_brick.health == 0 {

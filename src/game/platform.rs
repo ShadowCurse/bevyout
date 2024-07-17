@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 use crate::config::GameConfig;
 use crate::events::GameEvents;
-use crate::game::physics::{CollisionEvent, Dynamic, PhysicsStage, Rectangle};
-use crate::game::GameElement;
+use crate::game::physics::{CollisionEvent, Dynamic, PhysicsSet, Rectangle};
 use crate::game::GameState;
 
 use super::ball::{GameBall, GameBallEvent};
@@ -12,18 +11,24 @@ pub struct PlatformPlugin;
 
 impl Plugin for PlatformPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(GameState::InGame).with_system(platform_spawn));
-        app.add_system_set_to_stage(
-            PhysicsStage::Movement,
-            SystemSet::on_update(GameState::InGame).with_system(platform_movement),
+        app.add_systems(OnEnter(GameState::InGame), platform_spawn);
+        app.add_systems(
+            Update,
+            platform_movement
+                .in_set(PhysicsSet::Movement)
+                .run_if(in_state(GameState::InGame)),
         );
-        app.add_system_set_to_stage(
-            PhysicsStage::CollisionDetection,
-            SystemSet::on_update(GameState::InGame).with_system(platform_lifes),
+        app.add_systems(
+            Update,
+            platform_lifes
+                .in_set(PhysicsSet::CollisionDetection)
+                .run_if(in_state(GameState::InGame)),
         );
-        app.add_system_set_to_stage(
-            PhysicsStage::CollisionResolution,
-            SystemSet::on_update(GameState::InGame).with_system(platform_collision),
+        app.add_systems(
+            Update,
+            platform_collision
+                .in_set(PhysicsSet::CollisionResolution)
+                .run_if(in_state(GameState::InGame)),
         );
     }
 }
@@ -35,7 +40,7 @@ pub struct GamePlatform {
     pub speed: f32,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Resource)]
 pub struct PlatformLifes {
     pub max: u32,
     pub current: u32,
@@ -53,13 +58,13 @@ fn platform_spawn(
     });
 
     let material = materials.add(StandardMaterial {
-        emissive: config.platform_color,
+        emissive: config.platform_color.into(),
         ..default()
     });
 
     commands
-        .spawn_bundle(PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Box::new(
+        .spawn(PbrBundle {
+            mesh: meshes.add(Mesh::from(Cuboid::new(
                 config.platform_width,
                 config.platform_height,
                 1.0,
@@ -68,7 +73,7 @@ fn platform_spawn(
             transform: Transform::from_xyz(config.scene_width as f32 / 2.0, 10.0, 0.0),
             ..default()
         })
-        .insert(GameElement)
+        .insert(StateScoped(GameState::InGame))
         .insert(Rectangle {
             width: config.platform_width,
             height: config.platform_height,
@@ -82,16 +87,16 @@ fn platform_spawn(
 }
 
 fn platform_movement(
-    keys: Res<Input<KeyCode>>,
+    keys: Res<ButtonInput<KeyCode>>,
     time: Res<Time>,
     mut platform: Query<(&GamePlatform, &mut Transform)>,
 ) {
     if let Ok((platform, mut transform)) = platform.get_single_mut() {
-        if keys.pressed(KeyCode::A) {
+        if keys.pressed(KeyCode::KeyA) {
             transform.translation.x -= platform.speed * time.delta_seconds();
         }
 
-        if keys.pressed(KeyCode::D) {
+        if keys.pressed(KeyCode::KeyD) {
             transform.translation.x += platform.speed * time.delta_seconds();
         }
     }
@@ -121,7 +126,7 @@ fn platform_collision(
 ) {
     if let Ok((platform_entity, platform_rect, mut platform_transform)) = platform.get_single_mut()
     {
-        for event in collision_events.iter() {
+        for event in collision_events.read() {
             if event.entity1 == platform_entity {
                 if event.collision_point.x < platform_transform.translation.x {
                     let diff = event.collision_point.x

@@ -3,27 +3,15 @@ use bevy::{app::AppExit, prelude::*};
 use crate::config::UiConfig;
 use crate::game::GameState;
 use crate::ui::{spawn_button, UiState};
-use crate::utils::remove_all_with;
 
 pub struct MainMenuPlugin;
 
 impl Plugin for MainMenuPlugin {
     fn build(&self, app: &mut App) {
-        app.add_system_set(SystemSet::on_enter(UiState::MainMenu).with_system(main_menu_setup));
-        app.add_system_set(SystemSet::on_update(UiState::MainMenu).with_system(button_system));
-        app.add_system_set(
-            SystemSet::on_pause(UiState::MainMenu)
-                .with_system(remove_all_with::<UiMainMenuElement>),
-        );
-        app.add_system_set(
-            SystemSet::on_exit(UiState::MainMenu).with_system(remove_all_with::<UiMainMenuElement>),
-        );
-        app.add_system_set(SystemSet::on_resume(UiState::MainMenu).with_system(main_menu_setup));
+        app.add_systems(OnEnter(UiState::MainMenu), main_menu_setup);
+        app.add_systems(Update, button_system.run_if(in_state(UiState::MainMenu)));
     }
 }
-
-#[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
-struct UiMainMenuElement;
 
 #[derive(Component, Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum MainMenuButton {
@@ -34,45 +22,40 @@ enum MainMenuButton {
 
 fn main_menu_setup(mut commands: Commands, config: Res<UiConfig>) {
     commands
-        .spawn_bundle(NodeBundle {
+        .spawn(NodeBundle {
             style: config.menu_style.clone(),
-            color: config.menu_color.into(),
+            background_color: config.menu_color.into(),
             ..default()
         })
-        .insert(UiMainMenuElement)
+        .insert(StateScoped(UiState::MainMenu))
         .with_children(|builder| {
-            spawn_button(builder, &config, MainMenuButton::Start, UiMainMenuElement);
-            spawn_button(
-                builder,
-                &config,
-                MainMenuButton::Settings,
-                UiMainMenuElement,
-            );
-            spawn_button(builder, &config, MainMenuButton::Exit, UiMainMenuElement);
+            spawn_button(builder, &config, MainMenuButton::Start);
+            spawn_button(builder, &config, MainMenuButton::Settings);
+            spawn_button(builder, &config, MainMenuButton::Exit);
         });
 }
 
 fn button_system(
     style: Res<UiConfig>,
-    mut ui_state: ResMut<State<UiState>>,
-    mut game_state: ResMut<State<GameState>>,
+    mut ui_state: ResMut<NextState<UiState>>,
+    mut game_state: ResMut<NextState<GameState>>,
     mut interaction_query: Query<
-        (&MainMenuButton, &Interaction, &mut UiColor),
+        (&MainMenuButton, &Interaction, &mut BackgroundColor),
         (Changed<Interaction>, With<Button>),
     >,
     mut exit: EventWriter<AppExit>,
 ) {
     for (button, interaction, mut color) in interaction_query.iter_mut() {
         match *interaction {
-            Interaction::Clicked => {
+            Interaction::Pressed => {
                 *color = style.btn_color_pressed.into();
                 match button {
                     MainMenuButton::Start => {
-                        ui_state.push(UiState::InGame).unwrap();
-                        game_state.push(GameState::InGame).unwrap();
+                        ui_state.set(UiState::InGame);
+                        game_state.set(GameState::InGame);
                     }
-                    MainMenuButton::Settings => ui_state.push(UiState::Settings).unwrap(),
-                    MainMenuButton::Exit => exit.send(AppExit),
+                    MainMenuButton::Settings => ui_state.set(UiState::Settings),
+                    MainMenuButton::Exit => _ = exit.send(AppExit::Success),
                 }
             }
             Interaction::Hovered => {
