@@ -1,6 +1,3 @@
 /target
 Cargo.lock
 **/*.rs.bk
-
-.cargo
-rust-toolchain.toml
