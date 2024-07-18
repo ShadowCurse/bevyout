@@ -35,10 +35,13 @@ fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
         // Vertical layout
         .spawn(NodeBundle {
             style: Style {
+                display: Display::Grid,
+                grid_auto_flow: GridAutoFlow::Row,
                 margin: UiRect::all(Val::Auto),
+                justify_items: JustifyItems::Center,
+                justify_self: JustifySelf::Center,
+                align_items: AlignItems::Center,
                 align_self: AlignSelf::Center,
-                flex_direction: FlexDirection::Column,
-                justify_content: JustifyContent::Center,
                 ..default()
             },
             background_color: config.menu_color.into(),
@@ -46,11 +49,61 @@ fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
         })
         .insert(StateScoped(UiState::Settings))
         .with_children(|builder| {
+            // Display and Sound settings
+            // Horizontal layout
+            builder
+                .spawn(NodeBundle {
+                    style: Style {
+                        display: Display::Grid,
+                        grid_auto_flow: GridAutoFlow::Row,
+                        ..default()
+                    },
+                    background_color: config.menu_color.into(),
+                    ..default()
+                })
+                .with_children(|builder| {
+                    spawn_button(builder, &config, SettingsButton::DisplayFullScreen);
+                    spawn_button(builder, &config, SettingsButton::DisplayWindowed);
+                });
+            // Sound
+            // Horizontal layout
+            builder
+                .spawn(NodeBundle {
+                    style: Style {
+                        display: Display::Grid,
+                        grid_auto_flow: GridAutoFlow::Row,
+                        margin: UiRect::all(Val::Auto),
+                        align_items: AlignItems::Center,
+                        align_self: AlignSelf::Center,
+                        ..default()
+                    },
+                    background_color: config.menu_color.into(),
+                    ..default()
+                })
+                .with_children(|builder| {
+                    // Volume up and down
+                    spawn_button(builder, &config, SettingsButton::VolumeDown);
+                    spawn_button(builder, &config, SettingsButton::VolumeUp);
+                    // Volume value
+                    builder
+                        .spawn(TextBundle {
+                            text: Text::from_section(
+                                format!("Volume: {}%", 100),
+                                config.text_style.clone(),
+                            ),
+                            ..default()
+                        })
+                        .insert(UiSettingsVolume);
+                });
             // Back button
             builder
                 .spawn(NodeBundle {
                     style: Style {
+                        display: Display::Grid,
+                        grid_auto_flow: GridAutoFlow::Row,
                         margin: UiRect::all(Val::Auto),
+                        align_items: AlignItems::Center,
+                        align_self: AlignSelf::Center,
                         ..default()
                     },
                     background_color: config.menu_color.into(),
@@ -58,78 +111,6 @@ fn settings_setup(mut commands: Commands, config: Res<UiConfig>) {
                 })
                 .with_children(|builder| {
                     spawn_button(builder, &config, SettingsButton::Back);
-                });
-            // Display and Sound settings
-            // Horizontal layout
-            builder
-                .spawn(NodeBundle {
-                    style: Style {
-                        flex_direction: FlexDirection::Row,
-                        justify_content: JustifyContent::Center,
-                        ..default()
-                    },
-                    background_color: config.menu_color.into(),
-                    ..default()
-                })
-                .with_children(|builder| {
-                    // Display
-                    // Horizontal layout
-                    builder
-                        .spawn(NodeBundle {
-                            style: Style {
-                                flex_direction: FlexDirection::Row,
-                                justify_content: JustifyContent::Center,
-                                ..default()
-                            },
-                            background_color: config.menu_color.into(),
-                            ..default()
-                        })
-                        .with_children(|builder| {
-                            spawn_button(builder, &config, SettingsButton::DisplayFullScreen);
-                            spawn_button(builder, &config, SettingsButton::DisplayWindowed);
-                        });
-                    // Sound
-                    // Vertical layout
-                    builder
-                        .spawn(NodeBundle {
-                            style: Style {
-                                flex_direction: FlexDirection::Column,
-                                justify_content: JustifyContent::Center,
-                                align_items: AlignItems::Center,
-                                ..default()
-                            },
-                            background_color: config.menu_color.into(),
-                            ..default()
-                        })
-                        .with_children(|builder| {
-                            // Volume up and down
-                            // Horizontal layout
-                            builder
-                                .spawn(NodeBundle {
-                                    style: Style {
-                                        flex_direction: FlexDirection::Row,
-                                        justify_content: JustifyContent::Center,
-                                        align_items: AlignItems::Center,
-                                        ..default()
-                                    },
-                                    background_color: config.menu_color.into(),
-                                    ..default()
-                                })
-                                .with_children(|builder| {
-                                    spawn_button(builder, &config, SettingsButton::VolumeDown);
-                                    spawn_button(builder, &config, SettingsButton::VolumeUp);
-                                });
-                            // Volume value
-                            builder
-                                .spawn(TextBundle {
-                                    text: Text::from_section(
-                                        format!("Volume: {}%", 100),
-                                        config.text_style.clone(),
-                                    ),
-                                    ..default()
-                                })
-                                .insert(UiSettingsVolume);
-                        });
                 });
         });
 }

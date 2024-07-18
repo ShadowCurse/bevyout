@@ -85,16 +85,8 @@ pub fn setup_game_config(mut commands: Commands, asset_server: Res<AssetServer>)
     };
 
     // camera
-    let cam_pos = Vec3::new(
-        config.scene_width / 2.0,
-        config.scene_height / 2.0,
-        500.0,
-    );
-    let cam_look_at = Vec3::new(
-        config.scene_width / 2.0,
-        config.scene_height / 2.0,
-        0.0,
-    );
+    let cam_pos = Vec3::new(config.scene_width / 2.0, config.scene_height / 2.0, 500.0);
+    let cam_look_at = Vec3::new(config.scene_width / 2.0, config.scene_height / 2.0, 0.0);
 
     commands.insert_resource(config);
 
@@ -134,19 +126,25 @@ pub struct UiConfig {
 fn setup_ui_config(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.insert_resource(UiConfig {
         btn_style: Style {
-            margin: UiRect::all(Val::Percent(1.0)),
-            justify_content: JustifyContent::Center,
+            width: Val::Percent(150.0),
+            margin: UiRect::all(Val::Percent(10.0)),
+            padding: UiRect::all(Val::Percent(10.0)),
+            justify_items: JustifyItems::Center,
+            justify_self: JustifySelf::Center,
             align_items: AlignItems::Center,
+            align_self: AlignSelf::Center,
             ..default()
         },
         btn_color_normal: Color::srgb(0.15, 0.15, 0.15),
         btn_color_hover: Color::srgb(0.25, 0.25, 0.25),
         btn_color_pressed: Color::srgb(0.35, 0.75, 0.35),
         menu_style: Style {
+            display: Display::Grid,
             margin: UiRect::all(Val::Auto),
+            justify_items: JustifyItems::Center,
+            justify_self: JustifySelf::Center,
             align_items: AlignItems::Center,
-            flex_direction: FlexDirection::Column,
-            column_gap: Val::Percent(10.0),
+            align_self: AlignSelf::Center,
             ..default()
         },
         menu_color: Color::NONE,

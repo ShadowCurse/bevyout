@@ -7,7 +7,6 @@ mod config;
 mod events;
 mod game;
 mod ui;
-// mod utils;
 
 use config::ConfigPlugin;
 use events::EventsPlugin;
